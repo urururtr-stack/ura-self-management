@@ -2186,14 +2186,15 @@ function buildWeeklyView() {
 }
 
 function buildMonthlyView() {
+  const gyr = graphYr;
   const wgts = [], fats = [], labels = [];
   for (let m = 1; m <= 12; m++) {
-    const d = m === mo ? data : getStoredMonth(yr, m);
+    const d = (gyr === yr && m === mo) ? data : getStoredMonth(gyr, m);
     wgts.push(monthAvgField(d, 'weight'));
     fats.push(monthAvgField(d, 'fatpct'));
     labels.push(`${m}月`);
   }
-  return buildScrollGraph(wgts, fats, labels, `${yr}年 — Monthly`);
+  return buildScrollGraph(wgts, fats, labels, `${gyr}年 — Monthly`, buildNavHtml(`${gyr}年`, 'year'));
 }
 
 function buildYearlyView() {
