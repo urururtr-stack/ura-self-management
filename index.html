@@ -1521,7 +1521,8 @@ function renderMonthly() {
     }
     return `<div class="metric-card-result">
       <div class="metric-card-label">${label}</div>
-      <div class="metric-card-value">${disp}<span class="metric-unit-inline">${unit}</span>${changeHtml}</div>
+      <div class="metric-card-value">${disp}<span class="metric-unit-inline">${unit}</span></div>
+      ${changeHtml}
     </div>`;
   }
 
