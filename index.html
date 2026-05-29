@@ -488,33 +488,44 @@ body.theme-light .menu-btn { background: rgba(244,244,244,.88); }
 .menu-overlay.open { opacity: 1; pointer-events: all; }
 .menu-drawer {
   position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
-  background: #ffffff;
-  border-left: 1px solid #ddd;
+  background: rgba(4,4,4,.98); backdrop-filter: blur(32px);
+  border-left: 1px solid var(--border2);
   z-index: 200; transition: right .28s cubic-bezier(.4,0,.2,1);
   display: flex; flex-direction: column;
+}
+body.theme-light .menu-drawer {
+  background: #ffffff;
+  border-left: 1px solid #ddd;
+  backdrop-filter: none;
 }
 .menu-drawer.open { right: 0; }
 .menu-drawer-top {
   display: flex; justify-content: flex-end; padding: 18px 18px 0;
-  border-bottom: 1px solid #e8e8e8; padding-bottom: 18px;
+  border-bottom: 1px solid var(--border); padding-bottom: 18px;
 }
+body.theme-light .menu-drawer-top { border-bottom-color: #e8e8e8; }
 .menu-close {
-  background: none; border: 1px solid #ccc; color: #333;
+  background: none; border: 1px solid var(--border2); color: var(--silver);
   width: 32px; height: 32px; font-size: 18px; cursor: pointer;
   display: flex; align-items: center; justify-content: center; transition: all .15s;
 }
-.menu-close:active { border-color: #333; color: #000; }
+body.theme-light .menu-close { border-color: #ccc; color: #333; }
+.menu-close:active { border-color: var(--white); color: var(--white); }
+body.theme-light .menu-close:active { border-color: #333; color: #000; }
 .menu-item {
   display: block; padding: 18px 28px;
-  font-size: 13px; letter-spacing: 4px; color: #333;
+  font-size: 13px; letter-spacing: 4px; color: var(--light);
   cursor: pointer; text-transform: uppercase;
-  border-bottom: 1px solid #e8e8e8; transition: color .15s;
+  border-bottom: 1px solid var(--border); transition: color .15s;
   background: none; border-left: none; border-right: none; border-top: none;
   text-align: left; width: 100%; font-family: inherit; min-height: 56px;
 }
+body.theme-light .menu-item { color: #555; border-bottom-color: #e8e8e8; }
 .menu-item:last-child { border-bottom: none; }
-.menu-item:active { color: #000; }
-.menu-item.menu-active { color: #000; font-weight: 600; text-shadow: none; }
+.menu-item:active { color: var(--white); }
+body.theme-light .menu-item:active { color: #000; }
+.menu-item.menu-active { color: var(--white); text-shadow: none; }
+body.theme-light .menu-item.menu-active { color: #000; text-shadow: none; }
 /* ── Account Modal ── */
 .acct-modal {
   position: fixed; inset: 0; z-index: 300;
