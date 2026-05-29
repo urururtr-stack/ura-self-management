@@ -2353,6 +2353,36 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '') {
   </div>`;
 }
 
+function buildNavHtml(label, mode = 'month') {
+  const btnStyle = `background:none;border:1px solid var(--border2);color:var(--white);width:36px;height:36px;font-size:16px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;flex-shrink:0`;
+  return `<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px 6px;gap:10px">
+    <button style="${btnStyle}" onclick="navigateGraph(-1)">◀</button>
+    <span style="font-size:14px;letter-spacing:2px;color:var(--white);font-weight:300;text-align:center;flex:1">${label}</span>
+    <button style="${btnStyle}" onclick="navigateGraph(1)">▶</button>
+  </div>`;
+}
+
+function navigateGraph(delta) {
+  if (graphViewType === 'MONTHLY') {
+    graphYr += delta;
+  } else if (graphViewType === 'YEARLY') {
+    graphYr += delta * 3;
+  } else {
+    graphMo += delta;
+    if (graphMo > 12) { graphMo = 1; graphYr++; }
+    if (graphMo < 1)  { graphMo = 12; graphYr--; }
+  }
+  collect();
+  const body = document.getElementById('viewBody');
+  switch (graphViewType) {
+    case 'DAILY':   body.innerHTML = buildDailyView();   break;
+    case 'WEEKLY':  body.innerHTML = buildWeeklyView();  break;
+    case 'MONTHLY': body.innerHTML = buildMonthlyView(); break;
+    case 'YEARLY':  body.innerHTML = buildYearlyView();  break;
+  }
+  animateFatClips();
+}
+
 // ── Menu ─────────────────────────────────────────
 function toggleMenu() {
   const open = document.getElementById('menuDrawer').classList.toggle('open');
