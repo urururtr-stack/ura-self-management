@@ -2202,7 +2202,7 @@ function buildMonthlyView() {
     fats.push(monthAvgField(d, 'fatpct'));
     labels.push(`${m}月`);
   }
-  return buildScrollGraph(wgts, fats, labels, `${gyr}年 — Monthly`, buildNavHtml(`${gyr}年`, 'year'));
+  return buildScrollGraph(wgts, fats, labels, `${gyr}年 — Monthly`, buildNavHtml(`${gyr}年`, 'year'), 1);
 }
 
 function buildYearlyView() {
