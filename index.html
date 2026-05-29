@@ -2317,6 +2317,7 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '') {
 
   drawGrid(wRange, 0);
   drawGrid(fRange, GH + sep);
+  drawVerticalGrid();
 
   const DRAW_SPEED = 1000; // px/s 固定
   function calcCumDist(vals, yFn) {
