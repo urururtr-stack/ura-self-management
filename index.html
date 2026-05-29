@@ -1193,7 +1193,7 @@ function renderWeightGraph(weekIdx) {
       const lbl = labels[i];
       const t = cumDist[i] !== null ? (cumDist[i] / totalLen * DUR).toFixed(2) : '0.00';
       const showLbl = lbl !== null && (!isMonthly || lbl === 1 || lbl % 5 === 0 || lbl === last);
-      svg += `<text x="${x.toFixed(1)}" y="${H - 1}" text-anchor="middle" font-size="7.5" fill="${showLbl ? xca : xcb}" font-family="-apple-system,sans-serif" opacity="0">${showLbl ? lbl : ''}<animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${t}s" fill="freeze"/></text>`;
+      svg += `<text x="${x.toFixed(1)}" y="${H - 1}" text-anchor="middle" font-size="10" fill="${showLbl ? xca : xcb}" font-family="-apple-system,sans-serif" opacity="0">${showLbl ? lbl : ''}<animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${t}s" fill="freeze"/></text>`;
       if (v === null) return;
       const y = yOf(v);
       svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.5" fill="${dot}" filter="url(#${filterId})" opacity="0"><animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${t}s" fill="freeze"/></circle>`;
