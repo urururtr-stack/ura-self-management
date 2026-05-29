@@ -1362,7 +1362,6 @@ function renderWeek(w) {
         `<div class="delta-pill"><div class="delta-label">${label}</div><div class="delta-val" id="wdelta-${key}-${w}">— ${unit}</div></div>`
       ).join('')}
     </div>
-    <div class="grid-label">体重・体脂肪</div>
     ${makeHeader()}
     ${[['体重 kg','weight'],['体脂肪 %','fatpct']].map(([label,key]) => `
     <div class="check-row"><div class="item-label">${label}</div>${
