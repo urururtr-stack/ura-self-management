@@ -2190,7 +2190,7 @@ function buildWeeklyView() {
     }
     wgts.push(wv); fats.push(fv); labels.push(`W${w+1}`);
   }
-  return buildScrollGraph(wgts, fats, labels, `${gyr}年${gmo}月 — Weekly`, buildNavHtml(`${gyr}年${gmo}月`));
+  return buildScrollGraph(wgts, fats, labels, `${gyr}年${gmo}月 — Weekly`, buildNavHtml(`${gyr}年${gmo}月`), 1);
 }
 
 function buildMonthlyView() {
