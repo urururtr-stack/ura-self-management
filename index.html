@@ -2317,8 +2317,8 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '') {
       data-end="${fatClipEnd.toFixed(1)}" data-pathlen="${fatPathLen.toFixed(1)}"/>
   </clipPath></defs>`;
 
-  drawGrid(wRange, 0);
-  drawGrid(fRange, GH + sep);
+  drawGrid(wRange, 0, 0.5);
+  drawGrid(fRange, GH + sep, 0.1);
   drawVerticalGrid();
 
   const DRAW_SPEED = 1000; // px/s 固定
