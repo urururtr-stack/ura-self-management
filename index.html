@@ -2198,9 +2198,10 @@ function buildMonthlyView() {
 }
 
 function buildYearlyView() {
+  const endY = graphYr;
   const wgts = [], fats = [], labels = [];
-  const startY = yr - 2;
-  for (let y = startY; y <= yr; y++) {
+  const startY = endY - 2;
+  for (let y = startY; y <= endY; y++) {
     let wAll = [], fAll = [];
     for (let m = 1; m <= 12; m++) {
       const d = (y === yr && m === mo) ? data : getStoredMonth(y, m);
@@ -2213,7 +2214,7 @@ function buildYearlyView() {
     fats.push(fAll.length ? parseFloat((fAll.reduce((a,b)=>a+b,0)/fAll.length).toFixed(1)) : null);
     labels.push(String(y));
   }
-  return buildScrollGraph(wgts, fats, labels, '年間推移 — Yearly');
+  return buildScrollGraph(wgts, fats, labels, '年間推移 — Yearly', buildNavHtml(`${startY}〜${endY}年`, 'year'));
 }
 
 function buildScrollGraph(wgts, fats, labels, subtitle) {
