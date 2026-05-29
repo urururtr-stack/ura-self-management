@@ -1517,7 +1517,7 @@ function renderMonthly() {
     if (startVal !== null && endVal !== null) {
       const d = (endVal - startVal).toFixed(1);
       const cls = parseFloat(d) < 0 ? 'neg' : 'pos';
-      changeHtml = `<span class="change ${cls}" style="font-size:13px;margin-left:10px;letter-spacing:1px;">${parseFloat(d)>0?'+':''}${d} ${unit}</span>`;
+      changeHtml = `<span class="change ${cls}" style="font-size:13px;margin-left:10px;letter-spacing:1px;white-space:nowrap;">${parseFloat(d)>0?'+':''}${d} ${unit}</span>`;
     }
     return `<div class="metric-card-result">
       <div class="metric-card-label">${label}</div>
