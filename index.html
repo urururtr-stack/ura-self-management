@@ -2141,21 +2141,25 @@ function monthAvgField(d, field) {
 }
 
 function buildDailyView() {
-  const { last, day1js, numWeeks } = monthInfo(yr, mo);
+  const gyr = graphYr, gmo = graphMo;
+  const { last, day1js, numWeeks } = monthInfo(gyr, gmo);
   const wgts = Array(last).fill(null), fats = Array(last).fill(null);
-  for (let w = 0; w < numWeeks; w++) {
-    const s = 1 - day1js + w * 7;
-    for (let di = 0; di < 7; di++) {
-      const date = s + di;
-      if (date < 1 || date > last) continue;
-      const wv = data.weeks[w].weight?.[di] || '';
-      const fv = data.weeks[w].fatpct?.[di] || '';
-      if (wv && !isNaN(parseFloat(wv))) wgts[date-1] = parseFloat(wv);
-      if (fv && !isNaN(parseFloat(fv))) fats[date-1] = parseFloat(fv);
+  const gdata = (gyr === yr && gmo === mo) ? data : getStoredMonth(gyr, gmo);
+  if (gdata?.weeks) {
+    for (let w = 0; w < numWeeks; w++) {
+      const s = 1 - day1js + w * 7;
+      for (let di = 0; di < 7; di++) {
+        const date = s + di;
+        if (date < 1 || date > last) continue;
+        const wv = gdata.weeks[w]?.weight?.[di] || '';
+        const fv = gdata.weeks[w]?.fatpct?.[di] || '';
+        if (wv && !isNaN(parseFloat(wv))) wgts[date-1] = parseFloat(wv);
+        if (fv && !isNaN(parseFloat(fv))) fats[date-1] = parseFloat(fv);
+      }
     }
   }
   const labels = Array.from({length: last}, (_, i) => String(i+1));
-  return buildScrollGraph(wgts, fats, labels, `${yr}年${mo}月 — Daily`);
+  return buildScrollGraph(wgts, fats, labels, `${gyr}年${gmo}月 — Daily`, buildNavHtml(`${gyr}年${gmo}月`));
 }
 
 function buildWeeklyView() {
