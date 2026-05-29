@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>URA Self Management Progress</title>
+
+
+<style>
+:root {
+  --header-h: 0px;
+  --tabs-h: 0px;
+  --bg: #000;
+  --surface: #0f0f0f;
+  --surface2: #1a1a1a;
+  --border: #1f1f1f;
+  --border2: #2a2a2a;
+  --mid: #454545;
+  --muted: #606060;
+  --light: #909090;
+  --silver: #c0c0c0;
+  --white: #ffffff;
+  --neon: 0 0 6px #fff, 0 0 18px rgba(255,255,255,.55), 0 0 40px rgba(255,255,255,.2);
+  --neon-box: 0 0 6px rgba(255,255,255,.5), 0 0 20px rgba(255,255,255,.18);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  min-height: 100vh; max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ── Header ── */
+.app-header {
+  background: rgba(0,0,0,.96);
+  backdrop-filter: blur(24px);
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid var(--border2);
+  position: sticky; top: 0; z-index: 50;
+}
+.header-brand {
+  font-size: 10px; letter-spacing: 5px; color: var(--white);
+  text-transform: uppercase; margin-bottom: 14px; font-weight: 400;
+  text-shadow: var(--neon);
+}
+.header-main {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+}
+.nav-btn {
+  background: none; border: 1px solid var(--border2); color: var(--silver);
+  width: 44px; height: 44px; border-radius: 0; font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.nav-btn:active {
+  background: var(--surface2); border-color: var(--white); color: var(--white);
+  box-shadow: var(--neon-box);
+}
+.month-label {
+  font-size: 26px; font-weight: 200; letter-spacing: 6px; color: var(--white);
+  text-shadow: var(--neon); cursor: pointer; user-select: none;
+}
+.month-label::after {
+  content: ' ▾'; font-size: 13px; letter-spacing: 0;
+  opacity: .45; vertical-align: middle;
+}
+.today-btn {
+  display: block; margin: 0 auto 14px;
+  background: none; border: 1px solid var(--border2);
+  color: var(--muted); font-size: 9px; letter-spacing: 3px;
+  padding: 5px 16px; cursor: pointer; transition: all .15s;
+  text-transform: uppercase;
+}
+.today-btn:active { border-color: var(--white); color: var(--white); box-shadow: var(--neon-box); }
+.today-btn.current { border-color: var(--white); color: var(--white); text-shadow: var(--neon); }
+
+.progress-meta {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--muted); margin-bottom: 8px; letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.progress-meta strong {
+  color: var(--white); font-weight: 400;
+  text-shadow: var(--neon);
+}
+.progress-bg { height: 2px; background: var(--border2); }
+.progress-fill {
+  height: 100%; transition: width 0.5s ease;
+  background: var(--white);
+  box-shadow: var(--neon-box);
+}
+
+/* ── Tabs ── */
+.tab-nav {
+  display: flex; overflow-x: auto; scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,.96); backdrop-filter: blur(24px);
+  position: sticky; top: var(--header-h); z-index: 49;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0; padding: 14px 18px; font-size: 12px; color: var(--mid);
+  background: none; border: none; border-bottom: 2px solid transparent;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap; letter-spacing: 2px;
+  text-transform: uppercase; min-height: 48px;
+}
+.tab-btn.active {
+  color: var(--white); border-bottom-color: var(--white);
+  text-shadow: var(--neon);
+}
+
+/* ── Panes ── */
+.pane { display: none; padding: 20px; }
+.pane.active { display: block; }
+.pane-title {
+  font-size: 10px; letter-spacing: 5px; color: var(--white);
+  text-shadow: var(--neon);
+  text-transform: uppercase; font-weight: 400;
+}
+.pane-title-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+/* ── Month picker ── */
+.month-picker {
+  display: none; margin: 14px -20px -16px; padding: 16px 20px 12px;
+  border-top: 1px solid var(--border2);
+  background: rgba(0,0,0,.98);
+}
+.month-picker.open { display: block; }
+.picker-year-row {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+}
+.picker-yr-btn {
+  background: none; border: 1px solid var(--border2); color: var(--silver);
+  width: 44px; height: 44px; font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.picker-yr-btn:active { background: var(--surface2); border-color: var(--white); box-shadow: var(--neon-box); }
+.picker-yr-val { font-size: 18px; font-weight: 200; letter-spacing: 4px; color: var(--white); }
+.picker-months-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.picker-month-btn {
+  background: none; border: 1px solid var(--border2); color: var(--light);
+  padding: 13px 0; font-size: 14px; letter-spacing: 1px; cursor: pointer;
+  transition: all .15s; text-align: center; min-height: 48px;
+}
+.picker-month-btn:active { background: var(--surface2); }
+.picker-month-btn.active {
+  background: var(--white); color: var(--bg); border-color: var(--white);
+  box-shadow: var(--neon-box);
+}
+
+/* ── Date display (read-only) ── */
+.date-display {
+  font-size: 11px; color: var(--muted); letter-spacing: 1px;
+  user-select: none; white-space: nowrap;
+}
+
+/* ── Check grid ── */
+.grid-label {
+  font-size: 10px; letter-spacing: 3px; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 14px;
+}
+.day-header-row, .check-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(7, 38px);
+  gap: 4px; align-items: center; margin-bottom: 4px;
+}
+.day-header-row {
+  background: var(--bg); padding: 6px 0 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.item-label { font-size: 13px; color: var(--silver); line-height: 1.4; padding-right: 6px; min-width: 0; word-break: break-all; }
+.day-head { text-align: center; font-size: 11px; color: var(--white); line-height: 1.2; }
+.day-head.sat { color: #5599ff; }
+.day-head.sun { color: #ff4444; }
+.day-head.future { opacity: .3; }
+.future-cell { width: 38px; height: 38px; background: var(--surface); border: 1px solid var(--border); opacity: .2; cursor: not-allowed; flex-shrink: 0; }
+.day-num { display: block; font-size: 9px; color: var(--muted); margin-top: 2px; font-weight: 300; }
+.day-head.sat .day-num { color: rgba(85,153,255,.55); }
+.day-head.sun .day-num { color: rgba(255,68,68,.55); }
+
+/* ── Week delta ── */
+.week-delta { display: flex; gap: 8px; margin-top: 14px; }
+.delta-pill {
+  flex: 1; background: var(--surface); border: 1px solid var(--border2);
+  padding: 10px 12px;
+}
+.delta-label { font-size: 8px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
+.delta-val { font-size: 20px; font-weight: 200; letter-spacing: 2px; color: var(--border2); }
+.delta-val.neg { color: #5599ff; text-shadow: 0 0 6px #5599ff, 0 0 18px rgba(85,153,255,.5); }
+.delta-val.pos { color: #ff4444; text-shadow: 0 0 6px #ff4444, 0 0 18px rgba(255,68,68,.5); }
+.check-cell {
+  width: 38px; height: 38px; border: 1px solid var(--border2); border-radius: 0;
+  background: var(--surface); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: 16px; transition: all 0.12s;
+  color: transparent; user-select: none; flex-shrink: 0;
+}
+.check-cell.on {
+  background: var(--white); color: var(--bg); border-color: var(--white);
+  box-shadow: var(--neon-box);
+}
+
+/* ── Measure grid ── */
+.measure-cell {
+  width: 38px; height: 44px; border: 1px solid var(--border2);
+  background: var(--surface); color: var(--white);
+  font-size: 12px; text-align: center; outline: none; padding: 0 2px;
+  border-radius: 0; -moz-appearance: textfield; appearance: textfield; flex-shrink: 0;
+}
+.measure-cell::-webkit-outer-spin-button,
+.measure-cell::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.measure-cell:focus { border-color: var(--white); box-shadow: var(--neon-box); }
+.measure-cell::placeholder { color: var(--border2); }
+
+/* ── Divider ── */
+.sep { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* ── Field rows ── */
+.section-label {
+  font-size: 10px; letter-spacing: 4px; color: var(--light);
+  text-transform: uppercase; margin-bottom: 14px;
+}
+.field-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 13px 0; border-bottom: 1px solid var(--border);
+}
+.field-row:last-of-type { border-bottom: none; }
+.field-key { font-size: 14px; color: var(--silver); flex: 1; padding-right: 12px; }
+.field-val {
+  background: none; border: none; border-bottom: 1px solid var(--border2); color: var(--white);
+  font-size: 16px; text-align: right; width: 90px; padding: 8px 0; outline: none;
+  transition: border-color .15s;
+}
+.field-val:focus { border-bottom-color: var(--white); }
+.field-val::placeholder { color: var(--border2); }
+.toggle-grp { display: flex; gap: 6px; }
+.tog {
+  padding: 10px 16px; border-radius: 0; border: 1px solid var(--border2);
+  background: none; color: var(--muted); font-size: 13px; letter-spacing: 1px;
+  cursor: pointer; transition: all 0.15s; text-transform: uppercase; min-height: 44px;
+}
+.tog.on {
+  background: var(--white); color: var(--bg); border-color: var(--white);
+  box-shadow: var(--neon-box);
+}
+.memo-wrap { padding: 14px 0 0; }
+.memo-label { font-size: 13px; color: var(--light); margin-bottom: 8px; letter-spacing: .5px; }
+.memo {
+  width: 100%; background: var(--surface); border: 1px solid var(--border2); border-radius: 0;
+  color: var(--white); font-size: 16px; line-height: 1.75;
+  padding: 13px; resize: none; outline: none; min-height: 80px;
+  font-family: inherit; transition: border-color .15s, box-shadow .15s;
+}
+.memo:focus { border-color: var(--white); box-shadow: var(--neon-box); }
+.memo::placeholder { color: var(--border2); }
+
+/* ── Monthly ── */
+.stat-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.stat-pill {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 0; padding: 7px 15px; font-size: 12px; color: var(--muted); letter-spacing: 1px;
+}
+.stat-pill strong {
+  color: var(--white); font-weight: 400;
+  text-shadow: var(--neon);
+}
+.metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+.metric-card {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 0; padding: 14px; transition: border-color .15s, box-shadow .15s;
+}
+.metric-card:focus-within {
+  border-color: var(--white);
+  box-shadow: var(--neon-box);
+}
+.metric-card-result {
+  background: var(--surface); border: 2px solid var(--white);
+  border-radius: 0; padding: 14px;
+  box-shadow: var(--neon-box);
+}
+.metric-card-result .metric-card-label { color: var(--silver); }
+.metric-card-result .metric-card-value {
+  font-size: 26px; font-weight: 400; letter-spacing: 2px; color: var(--white);
+  text-shadow: var(--neon); margin: 8px 0 4px;
+}
+.metric-card-result .metric-card-unit { color: var(--silver); font-weight: 400; }
+.metric-unit-inline { font-size: 13px; font-weight: 300; letter-spacing: 1px; margin-left: 5px; color: var(--silver); }
+.header-goal {
+  display: flex; border: 1px solid var(--border2); margin-bottom: 12px;
+}
+.goal-item { flex: 1; padding: 10px 12px; }
+.goal-item + .goal-item { border-left: 1px solid var(--border2); }
+.goal-item-label { font-size: 8px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
+.goal-item-row { display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
+.goal-header-input {
+  background: none; border: none; outline: none;
+  color: var(--white); font-size: 22px; font-weight: 400; letter-spacing: 1px;
+  text-shadow: var(--neon); width: 64px;
+  -moz-appearance: textfield; appearance: textfield;
+}
+.goal-header-input::-webkit-outer-spin-button,
+.goal-header-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.goal-item-unit { font-size: 11px; color: var(--silver); }
+.goal-item-diff { display: block; font-size: 11px; letter-spacing: 1px; font-weight: 400; margin-top: 4px; }
+.result-row {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 8px; align-items: center; margin-bottom: 10px;
+}
+.result-arrow {
+  font-size: 28px; color: var(--white); text-align: center;
+  text-shadow: var(--neon); padding: 0 2px; line-height: 1; flex-shrink: 0;
+}
+.metric-card-label { font-size: 9px; color: var(--muted); margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
+.metric-card-input {
+  background: none; border: none; border-bottom: 1px solid var(--border2);
+  color: var(--white); font-size: 26px; font-weight: 200; letter-spacing: 2px;
+  width: 100%; padding: 2px 0; outline: none;
+}
+.metric-card-unit { font-size: 11px; color: var(--muted); margin-top: 6px; letter-spacing: 1px; }
+.change { font-weight: 400; letter-spacing: 1px; }
+.change.neg { color: #5599ff; text-shadow: 0 0 6px #5599ff, 0 0 18px rgba(85,153,255,.5); }
+.change.pos { color: #ff4444; text-shadow: 0 0 6px #ff4444, 0 0 18px rgba(255,68,68,.5); }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 90px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--surface2); border: 1px solid var(--white);
+  color: var(--white); font-size: 11px; letter-spacing: 3px;
+  padding: 9px 22px; border-radius: 0; opacity: 0;
+  text-transform: uppercase;
+  box-shadow: var(--neon-box);
+  text-shadow: var(--neon);
+  transition: all 0.25s; pointer-events: none; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Login Screen ── */
+.login-screen {
+  position: fixed; inset: 0; overflow-y: auto; overflow-x: hidden;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  padding: calc(32px + env(safe-area-inset-top)) 24px calc(32px + env(safe-area-inset-bottom));
+  background: #000;
+}
+.login-video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 0; opacity: .55;
+}
+.login-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom, rgba(0,0,0,.55) 0%, rgba(0,0,0,.72) 100%);
+}
+.login-box {
+  width: 100%; max-width: 360px;
+  position: relative; z-index: 2;
+}
+.login-title {
+  font-size: 22px; font-weight: 200; letter-spacing: 4px; color: var(--white);
+  text-shadow: var(--neon); margin-bottom: 40px; line-height: 1.4;
+  text-transform: uppercase;
+}
+.pw-wrap { position: relative; margin-bottom: 16px; }
+.pw-wrap .login-input { margin-bottom: 0; padding-right: 46px; }
+.pw-toggle {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 44px; background: none; border: none; cursor: pointer;
+  color: var(--muted); display: flex; align-items: center; justify-content: center;
+  transition: color .15s; padding: 0;
+}
+.pw-toggle:hover { color: var(--white); }
+.login-field-label {
+  font-size: 11px; letter-spacing: 3px; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.login-input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border2);
+  color: var(--white); font-size: 16px; padding: 13px 14px; outline: none;
+  letter-spacing: 1px; margin-bottom: 16px; border-radius: 0;
+  transition: border-color .15s, box-shadow .15s; font-family: inherit;
+}
+.login-input:focus { border-color: var(--white); box-shadow: var(--neon-box); }
+.login-input::placeholder { color: var(--muted); }
+.stay-label {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; color: var(--silver); letter-spacing: 1px;
+  cursor: pointer; margin-bottom: 22px; user-select: none;
+}
+.stay-check {
+  width: 22px; height: 22px; border: 1px solid var(--border2); flex-shrink: 0;
+  background: var(--surface); appearance: none; -webkit-appearance: none;
+  cursor: pointer; transition: all .15s; position: relative;
+}
+.stay-check:checked { background: var(--white); border-color: var(--white); box-shadow: var(--neon-box); }
+.stay-check:checked::after {
+  content: '✓'; position: absolute; top: 1px; left: 4px;
+  font-size: 13px; color: var(--bg); font-weight: 700;
+}
+.privacy-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 11px; color: var(--silver); letter-spacing: 1px;
+  cursor: pointer; margin-bottom: 22px; user-select: none; line-height: 1.5;
+}
+.privacy-link {
+  color: var(--white); text-decoration: underline; cursor: pointer;
+  background: none; border: none; font: inherit; font-size: 11px;
+  letter-spacing: 1px; padding: 0;
+}
+.privacy-modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75);
+  z-index: 9999; align-items: center; justify-content: center;
+}
+.privacy-modal-overlay.open { display: flex; }
+.privacy-modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  max-width: 340px; width: 90%; max-height: 70vh; border-radius: 4px;
+  display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,0,0,.5);
+}
+.privacy-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px 12px; border-bottom: 1px solid var(--border);
+  font-size: 11px; letter-spacing: 3px; color: var(--white); text-transform: uppercase;
+}
+.privacy-modal-close {
+  background: none; border: none; color: var(--muted); font-size: 18px;
+  cursor: pointer; padding: 0; line-height: 1;
+}
+.privacy-modal-body {
+  padding: 18px; overflow-y: auto; font-size: 11px; color: var(--silver);
+  line-height: 1.8; letter-spacing: .5px;
+}
+.privacy-modal-body h3 {
+  font-size: 11px; letter-spacing: 2px; color: var(--white); margin: 14px 0 6px;
+  text-transform: uppercase;
+}
+.privacy-modal-body h3:first-child { margin-top: 0; }
+.login-btn {
+  width: 100%; padding: 14px; background: var(--white); color: var(--bg);
+  border: none; font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  cursor: pointer; font-weight: 700; box-shadow: var(--neon-box);
+  margin-bottom: 10px; font-family: inherit; transition: opacity .15s;
+}
+.login-btn:active { opacity: .8; }
+.faceid-btn {
+  width: 100%; padding: 13px; background: none; color: var(--white);
+  border: 1px solid var(--border2); font-size: 12px; letter-spacing: 2px;
+  text-transform: uppercase; cursor: pointer; font-family: inherit;
+  transition: border-color .15s; margin-bottom: 10px;
+}
+.faceid-btn:hover { border-color: var(--white); }
+.login-msg { font-size: 12px; letter-spacing: 1px; margin-top: 8px; text-align: center; min-height: 18px; }
+.login-msg.err { color: #ff4444; }
+.login-msg.ok  { color: #5599ff; }
+.login-switch {
+  font-size: 15px; color: var(--muted); letter-spacing: 1px;
+  text-align: center; margin-top: 20px; cursor: pointer; text-decoration: underline;
+}
+.login-sep { height: 1px; background: var(--border); margin: 24px 0; }
+
+/* ── Menu ── */
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.header-top .header-brand { margin-bottom: 0; }
+.menu-btn {
+  background: none;
+  border: 1px solid var(--border2); color: var(--white);
+  width: 36px; height: 36px; font-size: 20px; cursor: pointer;
+  display: none; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0;
+}
+body.theme-light .menu-btn { background: rgba(244,244,244,.88); }
+.menu-btn:active { border-color: var(--white); box-shadow: var(--neon-box); }
+.menu-overlay {
+  position: fixed; inset: 0; z-index: 199;
+  background: rgba(0,0,0,.6); opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+.menu-overlay.open { opacity: 1; pointer-events: all; }
+.menu-drawer {
+  position: fixed; top: 0; right: -260px; width: 240px; height: 100%;
+  background: rgba(4,4,4,.98); backdrop-filter: blur(32px);
+  border-left: 1px solid var(--border2);
+  z-index: 200; transition: right .28s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column;
+}
+.menu-drawer.open { right: 0; }
+.menu-drawer-top {
+  display: flex; justify-content: flex-end; padding: 18px 18px 0;
+  border-bottom: 1px solid var(--border); padding-bottom: 18px;
+}
+.menu-close {
+  background: none; border: 1px solid var(--border2); color: var(--silver);
+  width: 32px; height: 32px; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.menu-close:active { border-color: var(--white); color: var(--white); }
+.menu-item {
+  display: block; padding: 18px 28px;
+  font-size: 13px; letter-spacing: 4px; color: var(--light);
+  cursor: pointer; text-transform: uppercase;
+  border-bottom: 1px solid var(--border); transition: color .15s;
+  background: none; border-left: none; border-right: none; border-top: none;
+  text-align: left; width: 100%; font-family: inherit; min-height: 56px;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-item:active { color: var(--white); }
+.menu-item.menu-active { color: var(--white); text-shadow: var(--neon); }
+/* ── Account Modal ── */
+.acct-modal {
+  position: fixed; inset: 0; z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.75); padding: 32px 24px;
+}
+.acct-box {
+  width: 100%; max-width: 320px;
+  background: var(--surface); border: 1px solid var(--border2); padding: 32px 28px;
+}
+.acct-title {
+  font-size: 10px; letter-spacing: 5px; color: var(--white);
+  text-shadow: var(--neon); text-transform: uppercase; margin-bottom: 8px;
+}
+.acct-sublabel {
+  font-size: 8px; letter-spacing: 3px; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.acct-id {
+  font-size: 20px; font-weight: 200; letter-spacing: 3px; color: var(--white);
+  margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+
+/* ── Theme Light ── */
+body.theme-light {
+  --bg: #f4f4f4; --surface: #ffffff; --surface2: #ebebeb;
+  --border: #e0e0e0; --border2: #d0d0d0; --mid: #aaaaaa;
+  --muted: #999999; --light: #666666; --silver: #444444; --white: #111111;
+  --neon: none; --neon-box: 0 1px 6px rgba(0,0,0,.12), 0 2px 16px rgba(0,0,0,.08);
+}
+body.theme-light .app-header { background: rgba(244,244,244,.96); }
+body.theme-light .tab-nav    { background: rgba(244,244,244,.96); }
+body.theme-light .day-header-row { background: var(--bg); }
+body.theme-light .month-picker { background: rgba(244,244,244,.98); }
+body.theme-light .login-screen { background: #f4f4f4; }
+body.theme-light .login-video  { display: none; }
+
+/* ── View Page ── */
+.view-page {
+  position: fixed; top: 0; bottom: 0; z-index: 100;
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  background: var(--bg); display: flex; flex-direction: column;
+}
+.view-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px; border-bottom: 1px solid var(--border2);
+  background: rgba(0,0,0,.96); backdrop-filter: blur(24px);
+  flex-shrink: 0;
+}
+body.theme-light .view-header { background: rgba(244,244,244,.96); }
+.view-back {
+  background: none; border: 1px solid var(--border2); color: var(--white);
+  width: 32px; height: 32px; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: all .15s;
+}
+.view-back:active { border-color: var(--white); }
+.view-title-text { display: none; }
+.view-tabs {
+  display: flex; flex: 1;
+}
+.view-tab {
+  flex: 1; background: none; border: none; border-bottom: 2px solid transparent;
+  color: var(--muted); font-size: 10px; letter-spacing: 1px;
+  text-transform: uppercase; padding: 8px 2px; cursor: pointer;
+  white-space: nowrap; transition: all .15s; font-family: inherit;
+  text-align: center;
+}
+.view-tab.active {
+  color: var(--white); border-bottom-color: var(--white);
+  text-shadow: var(--neon);
+}
+.view-body {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.view-scroll-x {
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  padding: 20px 20px 0;
+}
+.view-scroll-x::-webkit-scrollbar { height: 3px; }
+.view-scroll-x::-webkit-scrollbar-thumb { background: var(--mid); }
+
+/* ── Theme Modal ── */
+.theme-opts { margin: 4px 0 20px; }
+.theme-opt {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 15px 0; border-bottom: 1px solid var(--border);
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--silver); cursor: pointer; transition: color .15s;
+}
+.theme-opt:last-child { border-bottom: none; }
+.theme-opt.selected { color: var(--white); text-shadow: var(--neon); }
+.theme-opt-check { font-size: 14px; opacity: 0; }
+.theme-opt.selected .theme-opt-check { opacity: 1; }
+
+/* ── Weight Graph ── */
+.weight-graph { margin: 10px 0 20px; }
+.weight-graph:empty { display: none; }
+.graph-label {
+  font-size: 8px; letter-spacing: 3px; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 4px; line-height: 1.4;
+}
+</style>
+</head>
+<body>
+
+<!-- ── Login Screen ── -->
+<div id="loginScreen" class="login-screen">
+  <!-- 背景動画：同フォルダに login-bg.mp4 を置くと再生されます -->
+  <video class="login-video" id="loginVideo" autoplay loop muted playsinline>
+    <source src="login-bg.mp4" type="video/mp4">
+  </video>
+  <div class="login-overlay"></div>
+
+  <div class="login-box">
+    <div class="login-title">Self Management Progress</div>
+
+    <!-- ログイン -->
+    <div id="loginMode" style="display:none">
+      <form onsubmit="doLogin();return false;">
+        <div class="login-field-label">ログインID</div>
+        <input class="login-input" id="loginId" type="text" autocomplete="username" placeholder="ID">
+        <div class="login-field-label">パスワード</div>
+        <div class="pw-wrap">
+          <input class="login-input" id="loginPw" type="password" autocomplete="current-password" placeholder="Password">
+          <button type="button" class="pw-toggle" onclick="togglePw('loginPw',this)" tabindex="-1">
+            <svg id="eye-loginPw" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <label class="stay-label">
+          <input class="stay-check" type="checkbox" id="stayCheck"> ログインを保持する
+        </label>
+        <button class="login-btn" type="submit">ログイン</button>
+      </form>
+      <button class="faceid-btn" id="faceIdBtn" onclick="doFaceId()" style="display:none">Face ID でログイン</button>
+      <div class="login-msg" id="loginMsg"></div>
+      <div class="login-sep"></div>
+      <div class="login-switch" onclick="showSetup()">新規登録</div>
+      <div style="text-align:center;margin-top:14px;font-size:10px;color:var(--muted);letter-spacing:1px;cursor:pointer;text-decoration:underline" onclick="resetAccount()">アカウントをリセット</div>
+    </div>
+
+    <!-- 新規登録 -->
+    <div id="setupMode" style="display:none">
+      <form onsubmit="doSetup();return false;">
+        <div class="login-field-label">ログインID</div>
+        <input class="login-input" id="setupId" type="text" autocomplete="username" placeholder="ID を設定">
+        <div class="login-field-label">パスワード</div>
+        <div class="pw-wrap">
+          <input class="login-input" id="setupPw" type="password" autocomplete="new-password" placeholder="Password（4文字以上）">
+          <button type="button" class="pw-toggle" onclick="togglePw('setupPw',this)" tabindex="-1">
+            <svg id="eye-setupPw" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="login-field-label">パスワード（確認）</div>
+        <div class="pw-wrap">
+          <input class="login-input" id="setupPw2" type="password" autocomplete="new-password" placeholder="Confirm Password">
+          <button type="button" class="pw-toggle" onclick="togglePw('setupPw2',this)" tabindex="-1">
+            <svg id="eye-setupPw2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <label class="privacy-row">
+          <input class="stay-check" type="checkbox" id="privacyCheck" onclick="event.stopPropagation()">
+          <span><button type="button" class="privacy-link" onclick="openPrivacyModal();event.stopPropagation();event.preventDefault()">個人情報保護方針</button>に同意する</span>
+        </label>
+        <button class="login-btn" type="submit">アカウント作成</button>
+      </form>
+      <div class="login-msg" id="setupMsg"></div>
+      <div class="login-sep"></div>
+      <div class="login-switch" onclick="showLogin()">ログインに戻る</div>
+    </div>
+  </div>
+</div>
+
+<!-- 個人情報保護方針モーダル -->
+<div class="privacy-modal-overlay" id="privacyModalOverlay" onclick="closePrivacyModal(event)">
+  <div class="privacy-modal">
+    <div class="privacy-modal-header">
+      <span>個人情報保護方針</span>
+      <button class="privacy-modal-close" onclick="closePrivacyModal()">&times;</button>
+    </div>
+    <div class="privacy-modal-body">
+      <h3>1. 収集する情報</h3>
+      本アプリは、体重・体脂肪率などの健康データおよびログインID・パスワード（ハッシュ化）を収集します。これらの情報はすべてお使いのデバイスのローカルストレージに保存され、外部サーバーへ送信されることはありません。
+
+      <h3>2. 利用目的</h3>
+      収集した情報は、自己管理の記録・進捗確認・グラフ表示のみを目的として使用します。第三者への提供・販売は行いません。
+
+      <h3>3. 情報の管理</h3>
+      データはお客様のデバイス内にのみ保存されます。アプリの利用を終了する場合は、ブラウザのローカルストレージをクリアすることでデータを削除できます。
+
+      <h3>4. セキュリティ</h3>
+      パスワードはSHA-256でハッシュ化して保存します。平文のパスワードは保持しません。
+
+      <h3>5. 本方針の変更</h3>
+      本方針は予告なく変更される場合があります。最新の内容は本アプリ内でご確認ください。
+
+      <h3>お問い合わせ</h3>
+      個人情報に関するお問い合わせは、サービス提供者までご連絡ください。
+    </div>
+  </div>
+</div>
+
+<!-- ── App Wrapper ── -->
+<div id="appWrapper" style="display:none">
+
+<header class="app-header">
+  <div class="header-top">
+    <div class="header-brand">Self Management Progress</div>
+    <button class="menu-btn" id="globalMenuBtn" onclick="toggleMenu()">≡</button>
+  </div>
+  <div class="header-main">
+    <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+    <div class="month-label" id="monthLabel" onclick="togglePicker()"></div>
+    <button class="nav-btn" onclick="changeMonth(1)">›</button>
+  </div>
+  <div id="monthPicker" class="month-picker">
+    <div class="picker-year-row">
+      <button class="picker-yr-btn" onclick="shiftYear(-1)">‹</button>
+      <span class="picker-yr-val" id="pickerYr"></span>
+      <button class="picker-yr-btn" onclick="shiftYear(1)">›</button>
+    </div>
+    <div class="picker-months-grid" id="pickerMonths"></div>
+  </div>
+  <button class="today-btn" id="todayBtn" onclick="goToday()">Today</button>
+  <div class="header-goal">
+    <div class="goal-item">
+      <div class="goal-item-label">目標体重</div>
+      <div class="goal-item-row">
+        <input class="goal-header-input" id="h-goalWeight" type="number" inputmode="decimal" step="0.1" min="0" placeholder="—" oninput="onGoalInput('goalWeight')">
+        <span class="goal-item-unit">kg</span>
+      </div>
+      <span class="goal-item-diff" id="h-gwDiff"></span>
+    </div>
+    <div class="goal-item">
+      <div class="goal-item-label">目標体脂肪率</div>
+      <div class="goal-item-row">
+        <input class="goal-header-input" id="h-goalFat" type="number" inputmode="decimal" step="0.1" min="0" placeholder="—" oninput="onGoalInput('goalFat')">
+        <span class="goal-item-unit">%</span>
+      </div>
+      <span class="goal-item-diff" id="h-gfDiff"></span>
+    </div>
+  </div>
+  <div class="progress-meta">
+    <span>今月の達成率</span>
+    <strong id="progressPct">0%</strong>
+  </div>
+  <div class="progress-bg">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+</header>
+
+<nav class="tab-nav" id="tabNav"></nav>
+
+<div id="panesContainer"></div>
+
+<div class="toast" id="toast">保存済み</div>
+
+</div><!-- /#appWrapper -->
+
+<!-- ── Menu Overlay ── -->
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+<!-- ── Menu Drawer ── -->
+<div class="menu-drawer" id="menuDrawer">
+  <div class="menu-drawer-top">
+    <button class="menu-close" onclick="closeMenu()">×</button>
+  </div>
+  <button class="menu-item" id="mi-home"    onclick="menuGo('home')">Home</button>
+  <button class="menu-item" id="mi-account" onclick="menuGo('account')">Account</button>
+  <button class="menu-item" id="mi-daily"   onclick="menuGo('daily')">Daily</button>
+  <button class="menu-item" id="mi-weekly"  onclick="menuGo('weekly')">Weekly</button>
+  <button class="menu-item" id="mi-monthly" onclick="menuGo('monthly')">Monthly</button>
+  <button class="menu-item" id="mi-yearly"  onclick="menuGo('yearly')">Yearly</button>
+  <button class="menu-item" id="mi-theme"   onclick="menuGo('theme')">Theme</button>
+</div>
+
+<!-- ── Account Modal ── -->
+<div class="acct-modal" id="acctModal" style="display:none" onclick="closeAccountModal()">
+  <div class="acct-box" onclick="event.stopPropagation()" style="max-height:82vh;overflow-y:auto">
+    <div class="acct-title">Account</div>
+
+    <div class="acct-sublabel">ログインID</div>
+    <div class="acct-id" id="acctIdDisp"></div>
+
+    <div class="acct-sublabel">名前</div>
+    <input class="login-input" id="acctName" type="text" placeholder="名前を入力" style="margin-bottom:14px">
+
+    <div class="acct-sublabel">メールアドレス</div>
+    <input class="login-input" id="acctEmail" type="email" placeholder="example@email.com" style="margin-bottom:18px">
+
+    <button class="login-btn" onclick="saveAccountInfo()">プロフィールを保存</button>
+    <div class="login-sep"></div>
+
+    <div style="font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:14px">パスワード変更</div>
+    <div class="acct-sublabel">現在のパスワード</div>
+    <div class="pw-wrap">
+      <input class="login-input" id="acctOldPw" type="password" placeholder="現在のパスワード" style="margin-bottom:0;padding-right:46px">
+      <button type="button" class="pw-toggle" onclick="togglePw('acctOldPw',this)" tabindex="-1">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <div class="acct-sublabel" style="margin-top:10px">新しいパスワード</div>
+    <div class="pw-wrap">
+      <input class="login-input" id="acctNewPw" type="password" placeholder="新しいパスワード（4文字以上）" style="margin-bottom:0;padding-right:46px">
+      <button type="button" class="pw-toggle" onclick="togglePw('acctNewPw',this)" tabindex="-1">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <div class="acct-sublabel" style="margin-top:10px">確認</div>
+    <div class="pw-wrap" style="margin-bottom:16px">
+      <input class="login-input" id="acctNewPw2" type="password" placeholder="パスワードの確認" style="margin-bottom:0;padding-right:46px">
+      <button type="button" class="pw-toggle" onclick="togglePw('acctNewPw2',this)" tabindex="-1">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <button class="login-btn" onclick="changePassword()">パスワードを変更</button>
+    <div class="login-msg" id="acctMsg"></div>
+    <div class="login-sep"></div>
+
+    <div class="acct-sublabel">デバイス間のデータ引き継ぎ</div>
+    <button class="login-btn" onclick="generateTransferUrl()" style="margin-bottom:10px">引き継ぎURLを生成する</button>
+    <div id="transferUrlBox" style="display:none;margin-bottom:14px">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px">このURLをコピーしてスマホで開いてください</div>
+      <div style="display:flex;gap:6px;align-items:stretch">
+        <div id="transferUrlText" style="flex:1;background:var(--surface);border:1px solid var(--border2);padding:10px;font-size:10px;color:var(--silver);word-break:break-all;line-height:1.5"></div>
+        <button class="faceid-btn" onclick="copyTransferUrl()" style="flex-shrink:0;min-width:60px">コピー</button>
+      </div>
+      <div id="transferCopyMsg" style="font-size:11px;color:#5599ff;letter-spacing:1px;margin-top:6px;min-height:16px"></div>
+    </div>
+    <div class="login-sep"></div>
+
+    <div class="acct-sublabel">データ管理</div>
+    <button class="login-btn" onclick="restoreFromCloud()" style="margin-bottom:8px">☁ クラウドからデータを復元</button>
+    <button class="faceid-btn" onclick="exportData()" style="margin-bottom:8px">データをエクスポート（バックアップ）</button>
+    <button class="faceid-btn" onclick="document.getElementById('importFile').click()" style="margin-bottom:8px">データをインポート（復元）</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <div class="login-msg" id="dataMsg"></div>
+    <div class="login-sep"></div>
+
+    <button class="faceid-btn" onclick="doLogout()" style="margin-bottom:8px">ログアウト</button>
+    <button class="faceid-btn" onclick="closeAccountModal()">閉じる</button>
+  </div>
+</div>
+
+<!-- ── Theme Modal ── -->
+<div class="acct-modal" id="themeModal" style="display:none" onclick="closeThemeModal()">
+  <div class="acct-box" onclick="event.stopPropagation()">
+    <div class="acct-title">Theme</div>
+    <div class="theme-opts">
+      <div class="theme-opt" id="topt-light" onclick="applyTheme('light')">
+        <span>White</span><span class="theme-opt-check">✓</span>
+      </div>
+      <div class="theme-opt" id="topt-dark" onclick="applyTheme('dark')">
+        <span>Dark</span><span class="theme-opt-check">✓</span>
+      </div>
+    </div>
+    <button class="faceid-btn" onclick="closeThemeModal()">閉じる</button>
+  </div>
+</div>
+
+<!-- ── View Page ── -->
+<div id="viewPage" class="view-page" style="display:none">
+  <div class="view-header">
+    <button class="view-back" onclick="closeViewPage()">‹</button>
+    <div class="view-tabs">
+      <button class="view-tab" onclick="switchView('DAILY')">Daily</button>
+      <button class="view-tab" onclick="switchView('WEEKLY')">Weekly</button>
+      <button class="view-tab" onclick="switchView('MONTHLY')">Monthly</button>
+      <button class="view-tab" onclick="switchView('YEARLY')">Yearly</button>
+    </div>
+    <span class="view-title-text" id="viewTitleText"></span>
+  </div>
+  <div class="view-body" id="viewBody"></div>
+</div>
+
+<script>
+const ITEMS    = ['睡眠7h以上', '3食食べた', '30分以上歩いた', 'お酒、ジュース避けた', '夜は白米なし'];
+const DAYS     = ['日','月','火','水','木','金','土'];
+const MAX_WEEKS = 6;
+
+const now = new Date();
+let yr = now.getFullYear();
+let mo = now.getMonth() + 1;
+let data = {};
+let currentTab = 0;
+
+// ── Calendar-week helpers ─────────────────────────
+function monthInfo(y, m) {
+  const last  = new Date(y, m, 0).getDate();
+  const day1js = new Date(y, m-1, 1).getDay(); // 0=Sun
+  const numWeeks = Math.ceil((day1js + last) / 7);
+  return { last, day1js, numWeeks };
+}
+
+// First date (can be ≤ 0 = previous month) of calendar week w
+function wkStartDate(w) {
+  return 1 - monthInfo(yr, mo).day1js + w * 7;
+}
+
+function currentWeekIdx() {
+  const t = new Date();
+  if (t.getFullYear() !== yr || t.getMonth() + 1 !== mo) return 0;
+  const { day1js, numWeeks } = monthInfo(yr, mo);
+  const td = t.getDate();
+  for (let w = 0; w < numWeeks; w++) {
+    const s = 1 - day1js + w * 7;
+    if (td >= s && td <= s + 6) return w;
+  }
+  return 0;
+}
+
+// ── Storage ──────────────────────────────────────
+function key() {
+  const user = localStorage.getItem(A_USER) || 'default';
+  return `ura-${user}-${yr}-${String(mo).padStart(2,'0')}`;
+}
+
+function blankWeek() {
+  return {
+    checks: Array.from({length:ITEMS.length}, () => Array(7).fill(false)),
+    weight: Array(7).fill(''), fatpct: Array(7).fill('')
+  };
+}
+
+function blank() {
+  return {
+    weeks: Array.from({length: MAX_WEEKS}, blankWeek),
+    monthly: { good:'', improve:'', notes:'', goalWeight:'', goalFat:'' }
+  };
+}
+
+function load() {
+  try { data = JSON.parse(localStorage.getItem(key())) || blank(); }
+  catch(e) { data = blank(); }
+  if (!data.weeks) data = blank();
+  while (data.weeks.length < MAX_WEEKS) data.weeks.push(blankWeek());
+  // 旧データとの構造差異を正規化
+  data.weeks.forEach(wk => {
+    if (!Array.isArray(wk.checks)) wk.checks = Array.from({length: ITEMS.length}, () => Array(7).fill(false));
+    while (wk.checks.length < ITEMS.length) wk.checks.push(Array(7).fill(false));
+    wk.checks.forEach((row, i) => {
+      if (!Array.isArray(row)) wk.checks[i] = Array(7).fill(false);
+      while (row.length < 7) row.push(false);
+    });
+    if (!Array.isArray(wk.weight)) wk.weight = Array(7).fill('');
+    if (!Array.isArray(wk.fatpct)) wk.fatpct = Array(7).fill('');
+    while (wk.weight.length < 7) wk.weight.push('');
+    while (wk.fatpct.length < 7) wk.fatpct.push('');
+  });
+}
+
+function collect() {
+  for (let w = 0; w < MAX_WEEKS; w++) {
+    for (let di = 0; di < 7; di++) {
+      const wEl = document.getElementById(`weight-${w}-${di}`);
+      const fEl = document.getElementById(`fatpct-${w}-${di}`);
+      if (wEl) data.weeks[w].weight[di] = wEl.value;
+      if (fEl) data.weeks[w].fatpct[di] = fEl.value;
+    }
+  }
+  ['good','improve','notes'].forEach(k => {
+    const el = document.getElementById(`m-${k}`);
+    if (el) data.monthly[k] = el.value;
+  });
+  const g = loadGoals();
+  ['goalWeight','goalFat'].forEach(k => {
+    const el = document.getElementById(`h-${k}`);
+    if (el) g[k] = el.value;
+  });
+  saveGoals(g);
+}
+
+let _saveTimer = null;
+function autoSave() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    collect();
+    localStorage.setItem(key(), JSON.stringify(data));
+    renderWeightGraph(currentTab);
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1200);
+    scheduleCloudSync();
+  }, 600);
+}
+
+// ── Holiday helpers ───────────────────────────────
+function getHolidays(y, m) {
+  const h = new Set();
+  const last = new Date(y, m, 0).getDate();
+  // nth Monday of given month
+  const nthMon = (mo, n) => {
+    const d1 = new Date(y, mo - 1, 1).getDay();
+    return 1 + (8 - d1) % 7 + (n - 1) * 7;
+  };
+  // 春分・秋分（近似式）
+  const vernal   = () => Math.floor(20.8431 + 0.242194*(y-1980) - Math.floor((y-1980)/4));
+  const autumnal = () => Math.floor(23.2488 + 0.242194*(y-1980) - Math.floor((y-1980)/4));
+
+  const add = (...days) => days.forEach(d => { if (d >= 1 && d <= last) h.add(d); });
+
+  if (m===1)  add(1, nthMon(1,2));
+  if (m===2)  add(11, 23);
+  if (m===3)  add(vernal());
+  if (m===4)  add(29);
+  if (m===5)  add(3, 4, 5);
+  if (m===7)  add(nthMon(7,3));
+  if (m===8)  add(11);
+  if (m===9)  add(nthMon(9,3), autumnal());
+  if (m===10) add(nthMon(10,2));
+  if (m===11) add(3, 23);
+
+  // 振替休日: 日曜が祝日 → 翌月曜も休
+  [...h].forEach(d => {
+    if (new Date(y, m-1, d).getDay() === 0 && d+1 <= last) h.add(d+1);
+  });
+  // 国民の休日: 祝日に挟まれた平日
+  for (let d = 2; d < last; d++) {
+    if (new Date(y, m-1, d).getDay() !== 0 && h.has(d-1) && h.has(d+1)) h.add(d);
+  }
+  return h;
+}
+
+function updateStickyTop() {
+  const hh = document.querySelector('.app-header').offsetHeight;
+  const th = document.querySelector('.tab-nav').offsetHeight;
+  document.documentElement.style.setProperty('--header-h', hh + 'px');
+  document.documentElement.style.setProperty('--tabs-h', (hh + th) + 'px');
+}
+
+// ── Render ────────────────────────────────────────
+function renderTabs(numWeeks) {
+  document.getElementById('tabNav').innerHTML =
+    Array.from({length: numWeeks}, (_, w) =>
+      `<button class="tab-btn" onclick="switchTab(${w})">第${w+1}週</button>`
+    ).join('') + `<button class="tab-btn" onclick="switchTab(${numWeeks})">今月の結果</button>`;
+
+  document.getElementById('panesContainer').innerHTML =
+    Array.from({length: numWeeks}, (_, w) =>
+      `<div id="pane-${w}" class="pane"></div>`
+    ).join('') + `<div id="pane-monthly" class="pane"></div>`;
+}
+
+function renderWeightGraph(weekIdx) {
+  const { numWeeks, day1js, last } = monthInfo(yr, mo);
+
+  if (weekIdx === undefined || weekIdx === null) weekIdx = currentTab;
+  const isMonthly = weekIdx >= numWeeks;
+  const elId = isMonthly ? 'weekGraph-monthly' : `weekGraph-${weekIdx}`;
+  const el = document.getElementById(elId);
+  if (!el) return;
+
+  const wgts  = [];
+  const fats  = [];
+  const xlbls = [];
+
+  if (isMonthly) {
+    // 1日〜月末の全データ
+    for (let date = 1; date <= last; date++) {
+      xlbls.push(date);
+      let wv = '', fv = '';
+      for (let w = 0; w < numWeeks; w++) {
+        const s = 1 - day1js + w * 7;
+        const di = date - s;
+        if (di < 0 || di > 6) continue;
+        const wInp = document.getElementById(`weight-${w}-${di}`);
+        const fInp = document.getElementById(`fatpct-${w}-${di}`);
+        wv = wInp ? wInp.value : ((data.weeks[w].weight && data.weeks[w].weight[di]) || '');
+        fv = fInp ? fInp.value : ((data.weeks[w].fatpct && data.weeks[w].fatpct[di]) || '');
+        break;
+      }
+      wgts.push(wv !== '' && !isNaN(parseFloat(wv)) ? parseFloat(wv) : null);
+      fats.push(fv !== '' && !isNaN(parseFloat(fv)) ? parseFloat(fv) : null);
+    }
+  } else {
+    const w = weekIdx;
+    const s = 1 - day1js + w * 7;
+    const prevYr = mo===1?yr-1:yr, prevMo = mo===1?12:mo-1;
+    const nextYr = mo===12?yr+1:yr, nextMo = mo===12?1:mo+1;
+    const prevLast = new Date(prevYr, prevMo, 0).getDate();
+    const prevD = loadAdjMonth(prevYr, prevMo);
+    const nextD = loadAdjMonth(nextYr, nextMo);
+    for (let di = 0; di < 7; di++) {
+      const date = s + di;
+      let wv = '', fv = '', lbl = null;
+      if (date >= 1 && date <= last) {
+        lbl = date;
+        const wInp = document.getElementById(`weight-${w}-${di}`);
+        const fInp = document.getElementById(`fatpct-${w}-${di}`);
+        wv = wInp ? wInp.value : (data.weeks[w].weight?.[di] || '');
+        fv = fInp ? fInp.value : (data.weeks[w].fatpct?.[di] || '');
+      } else if (date < 1) {
+        const ad = prevLast + date;
+        lbl = ad;
+        const pos = findInMonth(prevYr, prevMo, ad);
+        if (pos) { wv = prevD.weeks[pos.aw]?.weight?.[pos.adi] || ''; fv = prevD.weeks[pos.aw]?.fatpct?.[pos.adi] || ''; }
+      } else {
+        const ad = date - last;
+        lbl = ad;
+        const pos = findInMonth(nextYr, nextMo, ad);
+        if (pos) { wv = nextD.weeks[pos.aw]?.weight?.[pos.adi] || ''; fv = nextD.weeks[pos.aw]?.fatpct?.[pos.adi] || ''; }
+      }
+      xlbls.push(lbl);
+      wgts.push(wv !== '' && !isNaN(parseFloat(wv)) ? parseFloat(wv) : null);
+      fats.push(fv !== '' && !isNaN(parseFloat(fv)) ? parseFloat(fv) : null);
+    }
+  }
+
+  const hasW = wgts.some(v => v !== null);
+  const hasF = fats.some(v => v !== null);
+  if (!hasW && !hasF) { el.innerHTML = ''; return; }
+
+  const isLight = document.body.classList.contains('theme-light');
+  const lc  = isLight ? 'rgba(0,0,0,.75)'  : 'rgba(255,255,255,.6)';
+  const tc  = isLight ? 'rgba(0,0,0,.85)'  : 'rgba(255,255,255,.88)';
+  const xca = isLight ? 'rgba(0,0,0,.4)'   : 'rgba(255,255,255,.35)';
+  const xcb = isLight ? 'rgba(0,0,0,.12)'  : 'rgba(255,255,255,.1)';
+  const dot = isLight ? '#111' : '#fff';
+
+  function lineChart(vals, labels, filterId, showValLabels) {
+    const valid = vals.filter(v => v !== null);
+    if (!valid.length) return '';
+    let minV = Math.min(...valid), maxV = Math.max(...valid);
+    if (maxV - minV < 0.5) { minV -= 0.5; maxV += 0.5; }
+    const W = 320, H = 66, padT = 18, padB = 14, padX = 16;
+    const innerH = H - padT - padB;
+    const innerW = W - padX * 2;
+    const n = vals.length;
+    const step = n > 1 ? innerW / (n - 1) : 0;
+    const xOf = i => n > 1 ? padX + i * step : W / 2;
+    const yOf = v => padT + innerH - ((v - minV) / (maxV - minV)) * innerH;
+
+    const segs = [];
+    let cur = [];
+    vals.forEach((v, i) => {
+      if (v !== null) cur.push(`${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`);
+      else { if (cur.length) { segs.push(cur); cur = []; } }
+    });
+    if (cur.length) segs.push(cur);
+
+    // 実際のパス長を計算してdasharray/dotタイミングを完全同期
+    const DRAW_SPEED = 1000; // px/s 固定
+    const cumDist = new Array(vals.length).fill(null);
+    let runDist = 0, prevPt = null;
+    vals.forEach((v, i) => {
+      if (v === null) { prevPt = null; return; }
+      const pt = [xOf(i), yOf(v)];
+      if (prevPt) runDist += Math.sqrt((pt[0]-prevPt[0])**2 + (pt[1]-prevPt[1])**2);
+      cumDist[i] = runDist;
+      prevPt = pt;
+    });
+    const totalLen = runDist || 1;
+    const DUR = Math.max(0.15, totalLen / DRAW_SPEED);
+
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="display:block">
+    <defs><filter id="${filterId}" x="-60%" y="-80%" width="220%" height="280%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter></defs>`;
+
+    segs.forEach(pts => {
+      if (pts.length < 2) return;
+      let sl = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const [x1,y1] = pts[i-1].split(',').map(Number);
+        const [x2,y2] = pts[i].split(',').map(Number);
+        sl += Math.sqrt((x2-x1)**2+(y2-y1)**2);
+      }
+      svg += `<polyline points="${pts.join(' ')}" fill="none" stroke="${lc}" stroke-width="1.5" stroke-linejoin="round" filter="url(#${filterId})" stroke-dasharray="${sl.toFixed(1)}" stroke-dashoffset="${sl.toFixed(1)}"><animate attributeName="stroke-dashoffset" from="${sl.toFixed(1)}" to="0" dur="${DUR}s" begin="0s" fill="freeze" calcMode="linear"/></polyline>`;
+    });
+
+    vals.forEach((v, i) => {
+      const x = xOf(i);
+      const lbl = labels[i];
+      const t = cumDist[i] !== null ? (cumDist[i] / totalLen * DUR).toFixed(2) : '0.00';
+      const showLbl = lbl !== null && (!isMonthly || lbl === 1 || lbl % 5 === 0 || lbl === last);
+      svg += `<text x="${x.toFixed(1)}" y="${H - 1}" text-anchor="middle" font-size="7.5" fill="${showLbl ? xca : xcb}" font-family="-apple-system,sans-serif" opacity="0">${showLbl ? lbl : ''}<animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${t}s" fill="freeze"/></text>`;
+      if (v === null) return;
+      const y = yOf(v);
+      svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.5" fill="${dot}" filter="url(#${filterId})" opacity="0"><animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${t}s" fill="freeze"/></circle>`;
+      if (showValLabels) svg += `<text x="${x.toFixed(1)}" y="${Math.max(11, y - 5).toFixed(1)}" text-anchor="middle" font-size="8" fill="${tc}" font-family="-apple-system,sans-serif" opacity="0">${v}<animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${t}s" fill="freeze"/></text>`;
+    });
+
+    svg += `</svg>`;
+    return svg;
+  }
+
+  el.innerHTML = `
+    <div>
+      <div class="graph-label">体重 kg</div>
+      ${hasW ? lineChart(wgts, xlbls, 'wg-neon-w', !isMonthly) : ''}
+    </div>
+    <div style="margin-top:8px">
+      <div class="graph-label">体脂肪率 %</div>
+      ${hasF ? lineChart(fats, xlbls, 'wg-neon-f', !isMonthly) : ''}
+    </div>`;
+}
+
+function renderAll() {
+  const { numWeeks } = monthInfo(yr, mo);
+  renderTabs(numWeeks);
+  for (let w = 0; w < numWeeks; w++) renderWeek(w);
+  renderMonthly();
+  updateProgress();
+  initGoalHeader();
+  requestAnimationFrame(updateStickyTop);
+}
+
+// ── 隣月データ ヘルパー ─────────────────────────────
+function monthInfoFor(y, m) {
+  const last = new Date(y, m, 0).getDate();
+  const day1js = new Date(y, m-1, 1).getDay();
+  return { last, day1js };
+}
+function findInMonth(y, m, date) {
+  const { day1js } = monthInfoFor(y, m);
+  for (let aw = 0; aw < 6; aw++)
+    for (let adi = 0; adi < 7; adi++)
+      if (1 - day1js + aw * 7 + adi === date) return { aw, adi };
+  return null;
+}
+function adjMonthKey(y, m) {
+  return `ura-${localStorage.getItem(A_USER)||'default'}-${y}-${String(m).padStart(2,'0')}`;
+}
+function loadAdjMonth(y, m) {
+  try { const d = JSON.parse(localStorage.getItem(adjMonthKey(y, m))); if (d?.weeks) return d; } catch(e) {}
+  return blank();
+}
+function saveAdjMonth(y, m, aw, adi, field, val) {
+  const d = loadAdjMonth(y, m);
+  if (!Array.isArray(d.weeks[aw]?.[field])) { if (d.weeks[aw]) d.weeks[aw][field] = Array(7).fill(''); }
+  if (d.weeks[aw]) d.weeks[aw][field][adi] = val;
+  localStorage.setItem(adjMonthKey(y, m), JSON.stringify(d));
+}
+function toggleAdjCheck(y, m, aw, adi, ci) {
+  const d = loadAdjMonth(y, m);
+  if (!Array.isArray(d.weeks[aw]?.checks[ci])) { if (d.weeks[aw]) d.weeks[aw].checks[ci] = Array(7).fill(false); }
+  if (d.weeks[aw]) d.weeks[aw].checks[ci][adi] = !d.weeks[aw].checks[ci][adi];
+  localStorage.setItem(adjMonthKey(y, m), JSON.stringify(d));
+  const el = document.querySelector(`[data-adj="${y}-${m}-${aw}-${adi}-${ci}"]`);
+  if (el) el.classList.toggle('on', d.weeks[aw].checks[ci][adi]);
+}
+
+function renderWeek(w) {
+  const wd   = data.weeks[w];
+  const hols = getHolidays(yr, mo);
+  const { last, day1js } = monthInfo(yr, mo);
+  const wkStart = 1 - day1js + w * 7;
+
+  // 隣月
+  const prevYr = mo === 1 ? yr-1 : yr, prevMo = mo === 1 ? 12 : mo-1;
+  const nextYr = mo === 12 ? yr+1 : yr, nextMo = mo === 12 ? 1 : mo+1;
+  const prevLast = new Date(prevYr, prevMo, 0).getDate();
+  const prevData = loadAdjMonth(prevYr, prevMo);
+  const nextData = loadAdjMonth(nextYr, nextMo);
+
+  // 未来日ロック判定（明日以降は入力不可・今日は入力可）
+  const t = new Date();
+  const isFutureMo = yr > t.getFullYear() || (yr === t.getFullYear() && mo > t.getMonth() + 1);
+  const todayD = (yr === t.getFullYear() && mo === t.getMonth() + 1) ? t.getDate() : null;
+  const isFuture = date => isFutureMo || (todayD !== null && date > todayD);
+  const isCellFuture = (cy, cm, cd) => {
+    const ty = t.getFullYear(), tm = t.getMonth()+1, td = t.getDate();
+    if (cy > ty) return true; if (cy < ty) return false;
+    if (cm > tm) return true; if (cm < tm) return false;
+    return cd > td;
+  };
+
+  // diごとの隣月情報
+  function adjOf(di) {
+    const date = wkStart + di;
+    if (date < 1) {
+      const ad = prevLast + date;
+      const pos = findInMonth(prevYr, prevMo, ad);
+      return pos ? { y: prevYr, m: prevMo, d: ad, aw: pos.aw, adi: pos.adi, data: prevData } : null;
+    }
+    if (date > last) {
+      const ad = date - last;
+      const pos = findInMonth(nextYr, nextMo, ad);
+      return pos ? { y: nextYr, m: nextMo, d: ad, aw: pos.aw, adi: pos.adi, data: nextData } : null;
+    }
+    return null;
+  }
+
+  // ヘッダー生成（共通）
+  function makeHeader() {
+    return `<div class="day-header-row"><div></div>${DAYS.map((d, di) => {
+      const date = wkStart + di;
+      const adj = adjOf(di);
+      if (adj) {
+        const jsD = new Date(adj.y, adj.m-1, adj.d).getDay();
+        const cls = jsD===6?' sat':jsD===0?' sun':'';
+        return `<div class="day-head${cls}">${d}<span class="day-num">${adj.d}</span></div>`;
+      }
+      const jsD = new Date(yr, mo-1, date).getDay();
+      const cls = jsD===6?' sat':(jsD===0||hols.has(date))?' sun':'';
+      const futCls = isFuture(date)?' future':'';
+      return `<div class="day-head${cls}${futCls}">${d}<span class="day-num">${date}</span></div>`;
+    }).join('')}</div>`;
+  }
+
+  // チェック行
+  let grid = makeHeader();
+  ITEMS.forEach((item, ci) => {
+    grid += `<div class="check-row"><div class="item-label">${item}</div>${
+      DAYS.map((_, di) => {
+        const date = wkStart + di;
+        const adj = adjOf(di);
+        if (adj) {
+          if (isCellFuture(adj.y, adj.m, adj.d)) return `<div class="check-cell future-cell"></div>`;
+          const checked = adj.data.weeks[adj.aw]?.checks[ci]?.[adj.adi] || false;
+          return `<div class="check-cell${checked?' on':''}" onclick="toggleAdjCheck(${adj.y},${adj.m},${adj.aw},${adj.adi},${ci})" data-adj="${adj.y}-${adj.m}-${adj.aw}-${adj.adi}-${ci}">✓</div>`;
+        }
+        if (isFuture(date)) return `<div class="check-cell future-cell"></div>`;
+        return `<div class="check-cell${(wd.checks[ci]&&wd.checks[ci][di])?' on':''}" onclick="toggle(${w},${ci},${di})" data-w="${w}" data-ci="${ci}" data-di="${di}">✓</div>`;
+      }).join('')
+    }</div>`;
+  });
+
+  // 日付表示（週全体）
+  const fd = wkStart, ld = wkStart + 6;
+  let dateDisplay;
+  if (fd < 1)        dateDisplay = `${prevMo}月${prevLast+fd}日 — ${mo}月${Math.min(ld,last)}日`;
+  else if (ld > last) dateDisplay = `${mo}月${fd}日 — ${nextMo}月${ld-last}日`;
+  else               dateDisplay = `${mo}月${fd}日 — ${mo}月${ld}日`;
+
+  document.getElementById(`pane-${w}`).innerHTML = `
+    <div class="pane-title-row">
+      <div class="pane-title">第${w+1}週</div>
+      <div class="date-display">${dateDisplay}</div>
+    </div>
+    <div id="weekGraph-${w}" class="weight-graph"></div>
+    <div class="week-delta">
+      ${[['体重変化','weight','kg'],['体脂肪変化','fatpct','%']].map(([label,key,unit]) =>
+        `<div class="delta-pill"><div class="delta-label">${label}</div><div class="delta-val" id="wdelta-${key}-${w}">— ${unit}</div></div>`
+      ).join('')}
+    </div>
+    <div class="grid-label">体重・体脂肪</div>
+    ${makeHeader()}
+    ${[['体重 kg','weight'],['体脂肪 %','fatpct']].map(([label,key]) => `
+    <div class="check-row"><div class="item-label">${label}</div>${
+      DAYS.map((_,di) => {
+        const date = wkStart + di;
+        const adj = adjOf(di);
+        if (adj) {
+          if (isCellFuture(adj.y, adj.m, adj.d)) return `<div class="check-cell future-cell"></div>`;
+          const val = adj.data.weeks[adj.aw]?.[key]?.[adj.adi] || '';
+          return `<input class="measure-cell" type="number" inputmode="decimal" step="0.1" min="0" placeholder="—"
+            value="${val}"
+            oninput="saveAdjMonth(${adj.y},${adj.m},${adj.aw},${adj.adi},'${key}',this.value)">`;
+        }
+        if (isFuture(date)) return `<div class="check-cell future-cell"></div>`;
+        return `<input class="measure-cell" type="number" inputmode="decimal" step="0.1" min="0" placeholder="—"
+          id="${key}-${w}-${di}" value="${(wd[key]&&wd[key][di])||''}"
+          oninput="updateWeekDelta(${w});updateGoalDiffs();autoSave()">`;
+      }).join('')
+    }</div>`).join('')}
+    <div class="sep"></div>
+    <div class="grid-label">日次チェック</div>
+    ${grid}`;
+
+  updateWeekDelta(w);
+}
+
+function updateWeekDelta(w) {
+  const { last, day1js } = monthInfo(yr, mo);
+  const wkStart = 1 - day1js + w * 7;
+  const prevYr = mo===1?yr-1:yr, prevMo = mo===1?12:mo-1;
+  const nextYr = mo===12?yr+1:yr, nextMo = mo===12?1:mo+1;
+  const prevLast = new Date(prevYr, prevMo, 0).getDate();
+
+  function getDayVal(di, key) {
+    const date = wkStart + di;
+    if (date >= 1 && date <= last) {
+      const inp = document.getElementById(`${key}-${w}-${di}`);
+      const v = inp ? inp.value : (data.weeks[w][key]?.[di] || '');
+      return v !== '' && !isNaN(parseFloat(v)) ? parseFloat(v) : null;
+    } else if (date < 1) {
+      const ad = prevLast + date;
+      const pos = findInMonth(prevYr, prevMo, ad);
+      if (!pos) return null;
+      const d = loadAdjMonth(prevYr, prevMo);
+      const v = d.weeks[pos.aw]?.[key]?.[pos.adi] || '';
+      return v !== '' && !isNaN(parseFloat(v)) ? parseFloat(v) : null;
+    } else {
+      const ad = date - last;
+      const pos = findInMonth(nextYr, nextMo, ad);
+      if (!pos) return null;
+      const d = loadAdjMonth(nextYr, nextMo);
+      const v = d.weeks[pos.aw]?.[key]?.[pos.adi] || '';
+      return v !== '' && !isNaN(parseFloat(v)) ? parseFloat(v) : null;
+    }
+  }
+
+  [['weight','kg'],['fatpct','%']].forEach(([key,unit]) => {
+    const el = document.getElementById(`wdelta-${key}-${w}`);
+    if (!el) return;
+    const sunVal = getDayVal(0, key);
+    const satVal = getDayVal(6, key);
+    if (sunVal === null || satVal === null) {
+      el.textContent = `— ${unit}`; el.className = 'delta-val'; return;
+    }
+    const d = (satVal - sunVal).toFixed(1);
+    el.textContent = `${parseFloat(d)>0?'+':''}${d} ${unit}`;
+    el.className = `delta-val ${parseFloat(d)<0?'neg':'pos'}`;
+  });
+}
+
+// 最新日付から逆順に探して一番新しい入力値を返す
+function getMostRecent(key) {
+  const { last, day1js, numWeeks } = monthInfo(yr, mo);
+  for (let w = numWeeks - 1; w >= 0; w--) {
+    const s = 1 - day1js + w * 7;
+    for (let di = 6; di >= 0; di--) {
+      const date = s + di;
+      if (date < 1 || date > last) continue;
+      const inp = document.getElementById(`${key}-${w}-${di}`);
+      const v = inp ? inp.value : ((data.weeks[w][key] && data.weeks[w][key][di]) || '');
+      if (v !== '' && !isNaN(parseFloat(v))) return parseFloat(v);
+    }
+  }
+  return null;
+}
+
+function updateGoalDiffs() {
+  const currentWeight = getMostRecent('weight');
+  const currentFat    = getMostRecent('fatpct');
+  function setDiff(diffId, current, goalId, unit) {
+    const diffEl = document.getElementById(diffId);
+    const goalEl = document.getElementById(goalId);
+    if (!diffEl || !goalEl) return;
+    const goalVal = goalEl.value !== '' ? parseFloat(goalEl.value) : null;
+    if (current === null || goalVal === null) {
+      diffEl.textContent = ''; diffEl.className = 'goal-item-diff'; return;
+    }
+    const d = (current - goalVal).toFixed(1);
+    const cls = parseFloat(d) <= 0 ? 'neg' : 'pos';
+    diffEl.textContent = `差 ${parseFloat(d) > 0 ? '+' : ''}${d} ${unit}`;
+    diffEl.className = `goal-item-diff change ${cls}`;
+  }
+  setDiff('h-gwDiff', currentWeight, 'h-goalWeight', 'kg');
+  setDiff('h-gfDiff', currentFat,    'h-goalFat',    '%');
+}
+
+function onGoalInput(key) {
+  const el = document.getElementById(`h-${key}`);
+  if (!el) return;
+  const g = loadGoals();
+  g[key] = el.value;
+  saveGoals(g);
+  updateGoalDiffs();
+}
+
+function initGoalHeader() {
+  const g = loadGoals();
+  const wEl = document.getElementById('h-goalWeight');
+  const fEl = document.getElementById('h-goalFat');
+  if (wEl) wEl.value = g.goalWeight || data.monthly.goalWeight || '';
+  if (fEl) fEl.value = g.goalFat    || data.monthly.goalFat    || '';
+  updateGoalDiffs();
+}
+
+// 週データから指定フィールドの月内最初・最後の値を返す
+function getFirstLast(key) {
+  const { last, day1js, numWeeks } = monthInfo(yr, mo);
+  let first = null, lastVal = null;
+  for (let w = 0; w < numWeeks; w++) {
+    const s = 1 - day1js + w * 7;
+    for (let di = 0; di < 7; di++) {
+      const date = s + di;
+      if (date < 1 || date > last) continue;
+      const v = data.weeks[w][key] && data.weeks[w][key][di];
+      if (v !== '' && v !== undefined && v !== null && !isNaN(parseFloat(v))) {
+        if (first === null) first = parseFloat(v);
+        lastVal = parseFloat(v);
+      }
+    }
+  }
+  return { first, last: lastVal };
+}
+
+function renderMonthly() {
+  const m = data.monthly;
+  const { last, day1js, numWeeks } = monthInfo(yr, mo);
+  let checked = 0;
+  for (let w = 0; w < numWeeks; w++) {
+    const s = 1 - day1js + w * 7;
+    for (let di = 0; di < 7; di++) {
+      const date = s + di;
+      if (date >= 1 && date <= last)
+        checked += data.weeks[w].checks.reduce((acc, r) => acc + (r[di] ? 1 : 0), 0);
+    }
+  }
+  const maxC = last * ITEMS.length;
+  const pct = maxC ? Math.round(checked/maxC*100) : 0;
+
+  const wt  = getFirstLast('weight');
+  const fat = getFirstLast('fatpct');
+
+  function startCard(label, val, unit) {
+    const disp = val !== null ? val.toFixed(1) : '—';
+    return `<div class="metric-card-result">
+      <div class="metric-card-label">${label}</div>
+      <div class="metric-card-value">${disp}<span class="metric-unit-inline">${unit}</span></div>
+    </div>`;
+  }
+
+  function endCard(label, startVal, endVal, unit) {
+    const disp = endVal !== null ? endVal.toFixed(1) : '—';
+    let changeHtml = '';
+    if (startVal !== null && endVal !== null) {
+      const d = (endVal - startVal).toFixed(1);
+      const cls = parseFloat(d) < 0 ? 'neg' : 'pos';
+      changeHtml = `<span class="change ${cls}" style="font-size:13px;margin-left:10px;letter-spacing:1px;">${parseFloat(d)>0?'+':''}${d} ${unit}</span>`;
+    }
+    return `<div class="metric-card-result">
+      <div class="metric-card-label">${label}</div>
+      <div class="metric-card-value">${disp}<span class="metric-unit-inline">${unit}</span>${changeHtml}</div>
+    </div>`;
+  }
+
+  document.getElementById('pane-monthly').innerHTML = `
+    <div class="pane-title">今月の結果</div>
+    <div id="weekGraph-monthly" class="weight-graph"></div>
+    <div class="stat-row">
+      <div class="stat-pill">達成率 <strong>${pct}%</strong></div>
+      <div class="stat-pill">チェック <strong>${checked}/${maxC}回</strong></div>
+    </div>
+    <div class="section-label" style="margin-bottom:12px;">体重・体脂肪率</div>
+    <div class="result-row">
+      ${startCard('月初の体重', wt.first, 'kg')}
+      <div class="result-arrow">▶</div>
+      ${endCard('月末の体重', wt.first, wt.last, 'kg')}
+    </div>
+    <div class="result-row" style="margin-bottom:20px;">
+      ${startCard('月初の体脂肪率', fat.first, '%')}
+      <div class="result-arrow">▶</div>
+      ${endCard('月末の体脂肪率', fat.first, fat.last, '%')}
+    </div>
+    <div class="sep"></div>
+    <div class="section-label">振り返り</div>
+    <div class="memo-wrap">
+      <div class="memo-label">今月「よくできた」行動（1〜2つ）</div>
+      <textarea class="memo" id="m-good" placeholder="例：接待の翌朝、毎回補正食を実践できた" oninput="autoSave()">${m.good||''}</textarea>
+    </div>
+    <div class="memo-wrap">
+      <div class="memo-label">来月「改善する」と決めた行動（1つだけ）</div>
+      <textarea class="memo" id="m-improve" placeholder="例：夜の炭水化物を控える日を週3日以上にする" oninput="autoSave()">${m.improve||''}</textarea>
+    </div>
+    <div class="memo-wrap">
+      <div class="memo-label">今月の自分を褒めろ</div>
+      <textarea class="memo" id="m-notes" placeholder="自由記入" oninput="autoSave()">${m.notes||''}</textarea>
+    </div>`;
+}
+
+// ── Interactions ──────────────────────────────────
+function toggle(w, ci, di) {
+  if (!Array.isArray(data.weeks[w].checks[ci])) data.weeks[w].checks[ci] = Array(7).fill(false);
+  data.weeks[w].checks[ci][di] = !data.weeks[w].checks[ci][di];
+  document.querySelectorAll(`.check-cell[data-w="${w}"][data-ci="${ci}"][data-di="${di}"]`)
+    .forEach(el => el.classList.toggle('on', data.weeks[w].checks[ci][di]));
+  updateProgress();
+  autoSave();
+}
+
+
+
+function switchTab(idx) {
+  currentTab = idx;
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  document.querySelectorAll('.pane').forEach((p,i) => p.classList.toggle('active', i===idx));
+  const { numWeeks } = monthInfo(yr, mo);
+  if (idx === numWeeks) { collect(); renderMonthly(); }
+  renderWeightGraph(idx);
+}
+
+function changeMonth(dir) {
+  collect();
+  mo += dir;
+  if (mo > 12) { mo = 1; yr++; }
+  if (mo < 1)  { mo = 12; yr--; }
+  document.getElementById('monthLabel').textContent = `${yr}年${mo}月`;
+  closePicker();
+  load(); renderAll(); switchTab(0);
+  updateTodayBtn();
+}
+
+// ── Month picker ──────────────────────────────────
+let pickerYr = yr;
+
+function togglePicker() {
+  const p = document.getElementById('monthPicker');
+  if (p.classList.toggle('open')) {
+    pickerYr = yr;
+    renderPicker();
+  }
+}
+
+function closePicker() {
+  document.getElementById('monthPicker').classList.remove('open');
+}
+
+function shiftYear(d) {
+  pickerYr += d;
+  renderPicker();
+}
+
+function renderPicker() {
+  document.getElementById('pickerYr').textContent = `${pickerYr}年`;
+  document.getElementById('pickerMonths').innerHTML =
+    Array.from({length:12}, (_,i) => {
+      const m = i + 1;
+      const active = (pickerYr === yr && m === mo) ? ' active' : '';
+      return `<button class="picker-month-btn${active}" onclick="applyYrMo(${pickerYr},${m})">${m}月</button>`;
+    }).join('');
+}
+
+function goToday() {
+  collect();
+  yr = now.getFullYear();
+  mo = now.getMonth() + 1;
+  document.getElementById('monthLabel').textContent = `${yr}年${mo}月`;
+  closePicker();
+  load(); renderAll(); switchTab(currentWeekIdx());
+  updateTodayBtn();
+}
+
+function updateTodayBtn() {
+  const t = new Date();
+  const isCurrent = yr === t.getFullYear() && mo === t.getMonth() + 1;
+  document.getElementById('todayBtn').classList.toggle('current', isCurrent);
+}
+
+function applyYrMo(y, m) {
+  collect(); yr = y; mo = m;
+  document.getElementById('monthLabel').textContent = `${yr}年${mo}月`;
+  closePicker();
+  load(); renderAll(); switchTab(currentWeekIdx());
+  updateTodayBtn();
+}
+
+function updateProgress() {
+  const { last, day1js, numWeeks } = monthInfo(yr, mo);
+  let total = 0;
+  for (let w = 0; w < numWeeks; w++) {
+    const s = 1 - day1js + w * 7;
+    for (let di = 0; di < 7; di++) {
+      const date = s + di;
+      if (date >= 1 && date <= last)
+        total += data.weeks[w].checks.reduce((acc, r) => acc + (r[di] ? 1 : 0), 0);
+    }
+  }
+  const max = last * ITEMS.length;
+  const pct = max ? Math.round(total/max*100) : 0;
+  document.getElementById('progressPct').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+}
+
+// ── Auth helpers ─────────────────────────────────
+const EYE_OPEN  = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const EYE_SHUT  = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
+function togglePw(inputId, btn) {
+  const inp  = document.getElementById(inputId);
+  const show = inp.type === 'password';
+  inp.type   = show ? 'text' : 'password';
+  btn.innerHTML = show ? EYE_SHUT : EYE_OPEN;
+}
+
+// ── Auth ─────────────────────────────────────────
+const A_USER = 'ura-auth-user';
+const A_HASH = 'ura-auth-hash';
+const A_CRED = 'ura-auth-cred';
+const A_SESS = 'ura-session';
+
+// ── Firebase Firestore (REST API) ──────────────────────────
+const FB_PROJECT = 'ura-nomore-diet';
+const FB_API_KEY = 'AIzaSyCmWDzCHf1ueqHqftSgcbMGg0nzO7VEJRE';
+const FS_URL = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents`;
+
+async function fsGet(docId) {
+  try {
+    const res = await fetch(`${FS_URL}/users/${encodeURIComponent(docId)}?key=${FB_API_KEY}`);
+    if (res.status === 404) return null;
+    const json = await res.json();
+    return json.fields || null;
+  } catch { return null; }
+}
+async function fsPatch(docId, fields) {
+  try {
+    await fetch(`${FS_URL}/users/${encodeURIComponent(docId)}?key=${FB_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields })
+    });
+  } catch {}
+}
+const fsStr = v => ({ stringValue: String(v) });
+const fsRead = f => f?.stringValue ?? null;
+
+// 全ユーザーデータをFirestoreへ保存（デバウンス付き）
+let _syncTimer = null;
+function scheduleCloudSync() {
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(pushToCloud, 3000);
+}
+async function pushToCloud() {
+  const userId = localStorage.getItem(A_USER);
+  if (!userId) return;
+  const dataObj = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith(`ura-${userId}-`) || k === A_NAME || k === A_EMAIL || k === A_THEME) {
+      dataObj[k] = localStorage.getItem(k);
+    }
+  }
+  await fsPatch(userId, {
+    hash: fsStr(localStorage.getItem(A_HASH) || ''),
+    appData: fsStr(JSON.stringify(dataObj))
+  });
+}
+async function pullFromCloud(userId) {
+  const fields = await fsGet(userId);
+  if (!fields) return false;
+  const appData = fsRead(fields.appData);
+  if (appData) {
+    try {
+      const obj = JSON.parse(appData);
+      Object.entries(obj).forEach(([k, v]) => localStorage.setItem(k, v));
+    } catch {}
+  }
+  return true;
+}
+function goalsKey() { return `ura-${localStorage.getItem(A_USER)||'default'}-goals`; }
+function loadGoals() { try { return JSON.parse(localStorage.getItem(goalsKey())) || {}; } catch(e) { return {}; } }
+function saveGoals(g) { localStorage.setItem(goalsKey(), JSON.stringify(g)); }
+const RP_ID  = window.location.hostname || 'localhost';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function isLoggedIn() {
+  return localStorage.getItem(A_SESS) === '1' || sessionStorage.getItem(A_SESS) === '1';
+}
+
+function startApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appWrapper').style.display  = '';
+  document.getElementById('globalMenuBtn').style.display = 'flex';
+  document.getElementById('monthLabel').textContent = `${yr}年${mo}月`;
+  load(); renderAll(); switchTab(currentWeekIdx()); updateTodayBtn();
+}
+
+function showMsg(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.className = `login-msg ${type||''}`;
+}
+
+function showSetup() {
+  document.getElementById('setupMode').style.display = '';
+  document.getElementById('loginMode').style.display = 'none';
+  showMsg('setupMsg','','');
+}
+
+function showLogin() {
+  document.getElementById('setupMode').style.display = 'none';
+  document.getElementById('loginMode').style.display = '';
+  showMsg('loginMsg','','');
+  checkFaceIdBtn();
+}
+
+async function checkFaceIdBtn() {
+  const btn = document.getElementById('faceIdBtn');
+  btn.style.display = 'none';
+  if (!window.PublicKeyCredential) return;
+  if (!localStorage.getItem(A_CRED)) return;
+  const avail = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(()=>false);
+  if (avail) btn.style.display = '';
+}
+
+function resetAccount() {
+  if (!confirm('アカウント情報をリセットしますか？\n記録データは残りますが、IDとパスワードが削除されます。')) return;
+  localStorage.removeItem(A_USER);
+  localStorage.removeItem(A_HASH);
+  localStorage.removeItem(A_CRED);
+  localStorage.removeItem(A_SESS);
+  sessionStorage.removeItem(A_SESS);
+  showSetup();
+  showMsg('setupMsg','リセットしました。新しいIDとパスワードを設定してください','ok');
+}
+
+function openPrivacyModal() {
+  document.getElementById('privacyModalOverlay').classList.add('open');
+}
+function closePrivacyModal(e) {
+  if (e && e.target !== document.getElementById('privacyModalOverlay')) return;
+  document.getElementById('privacyModalOverlay').classList.remove('open');
+}
+
+async function doSetup() {
+  const id  = document.getElementById('setupId').value.trim();
+  const pw  = document.getElementById('setupPw').value;
+  const pw2 = document.getElementById('setupPw2').value;
+  const agreed = document.getElementById('privacyCheck').checked;
+  if (!id)          return showMsg('setupMsg','IDを入力してください','err');
+  if (pw.length<4)  return showMsg('setupMsg','パスワードは4文字以上','err');
+  if (pw !== pw2)   return showMsg('setupMsg','パスワードが一致しません','err');
+  if (!agreed)      return showMsg('setupMsg','個人情報保護方針への同意が必要です','err');
+  showMsg('setupMsg','登録中…','');
+  const existing = await fsGet(id);
+  if (existing) return showMsg('setupMsg','このIDはすでに使われています','err');
+  const hash = await sha256(pw);
+  localStorage.setItem(A_USER, id);
+  localStorage.setItem(A_HASH, hash);
+  localStorage.removeItem(A_CRED);
+  await fsPatch(id, { hash: fsStr(hash), appData: fsStr('{}') });
+  saveSession(true);
+  startApp();
+}
+
+async function doLogin() {
+  const id   = document.getElementById('loginId').value.trim();
+  const pw   = document.getElementById('loginPw').value;
+  const stay = document.getElementById('stayCheck').checked;
+  if (!id || !pw) return showMsg('loginMsg','IDとパスワードを入力してください','err');
+  showMsg('loginMsg','確認中…','');
+  const fields = await fsGet(id);
+  if (!fields) return showMsg('loginMsg','IDが登録されていません','err');
+  const hash = await sha256(pw);
+  if (hash !== fsRead(fields.hash)) return showMsg('loginMsg','パスワードが違います','err');
+  localStorage.setItem(A_USER, id);
+  localStorage.setItem(A_HASH, hash);
+  await pullFromCloud(id);
+  saveSession(stay);
+  await offerFaceId();
+  startApp();
+}
+
+async function doFaceId() {
+  const credStr = localStorage.getItem(A_CRED);
+  if (!credStr) return;
+  try {
+    const credId  = new Uint8Array(credStr.split(',').map(Number));
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    await navigator.credentials.get({
+      publicKey: {
+        challenge, rpId: RP_ID, timeout: 60000,
+        userVerification: 'required',
+        allowCredentials: [{ id: credId, type: 'public-key', transports: ['internal'] }]
+      }
+    });
+    saveSession(document.getElementById('stayCheck').checked);
+    startApp();
+  } catch(e) {
+    showMsg('loginMsg', e.name === 'NotAllowedError' ? 'Face ID がキャンセルされました' : 'Face ID 認証に失敗しました', 'err');
+  }
+}
+
+async function offerFaceId() {
+  if (localStorage.getItem(A_CRED)) return;
+  if (!window.PublicKeyCredential) return;
+  const avail = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(()=>false);
+  if (!avail) return;
+  try {
+    const userId = localStorage.getItem(A_USER);
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rp: { name: 'URA × TRME', id: RP_ID },
+        user: { id: new TextEncoder().encode(userId), name: userId, displayName: userId },
+        pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
+        authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
+        timeout: 60000,
+      }
+    });
+    localStorage.setItem(A_CRED, Array.from(new Uint8Array(cred.rawId)).join(','));
+  } catch(e) { /* Face ID 登録をスキップ */ }
+}
+
+function saveSession(stay) {
+  if (stay) { localStorage.setItem(A_SESS,'1'); sessionStorage.removeItem(A_SESS); }
+  else       { sessionStorage.setItem(A_SESS,'1'); }
+}
+
+function doLogout() {
+  localStorage.removeItem(A_SESS);
+  sessionStorage.removeItem(A_SESS);
+  document.getElementById('globalMenuBtn').style.display = 'none';
+  location.reload();
+}
+
+async function generateTransferUrl() {
+  const userId = localStorage.getItem(A_USER) || 'default';
+  const backup = { version: 1, exportedAt: new Date().toISOString(), userId, data: {} };
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(`ura-${userId}-`) || key === A_USER || key === A_HASH || key === A_NAME || key === A_EMAIL || key === A_THEME) {
+      backup.data[key] = localStorage.getItem(key);
+    }
+  }
+  const json = JSON.stringify(backup);
+  let encoded;
+  try {
+    const stream = new CompressionStream('gzip');
+    const writer = stream.writable.getWriter();
+    writer.write(new TextEncoder().encode(json));
+    writer.close();
+    const buf = await new Response(stream.readable).arrayBuffer();
+    encoded = btoa(String.fromCharCode(...new Uint8Array(buf)));
+  } catch {
+    encoded = btoa(encodeURIComponent(json));
+  }
+  const url = `${location.origin}${location.pathname}#transfer=${encoded}`;
+  document.getElementById('transferUrlBox').style.display = '';
+  document.getElementById('transferUrlText').textContent = url;
+}
+
+async function copyTransferUrl() {
+  const url = document.getElementById('transferUrlText').textContent;
+  try {
+    await navigator.clipboard.writeText(url);
+    document.getElementById('transferCopyMsg').textContent = 'コピーしました';
+  } catch {
+    document.getElementById('transferCopyMsg').textContent = '上のURLを長押しでコピーしてください';
+  }
+}
+
+async function checkTransferHash() {
+  const hash = location.hash;
+  if (!hash.startsWith('#transfer=')) return;
+  const encoded = hash.slice('#transfer='.length);
+  history.replaceState(null, '', location.pathname);
+  let json;
+  try {
+    const bytes = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
+    const stream = new DecompressionStream('gzip');
+    const writer = stream.writable.getWriter();
+    writer.write(bytes);
+    writer.close();
+    json = new TextDecoder().decode(await new Response(stream.readable).arrayBuffer());
+  } catch {
+    try { json = decodeURIComponent(atob(encoded)); } catch { return; }
+  }
+  try {
+    const backup = JSON.parse(json);
+    if (!backup.data) return;
+    if (!confirm(`PCからのデータを引き継ぎます。\n現在のデータは上書きされます。よろしいですか？`)) return;
+    Object.entries(backup.data).forEach(([key, val]) => localStorage.setItem(key, val));
+    alert('引き継ぎ完了しました。ページを再読み込みします。');
+    location.reload();
+  } catch { return; }
+}
+
+async function restoreFromCloud() {
+  const userId = localStorage.getItem(A_USER);
+  if (!userId) return showMsg('dataMsg', 'ログインが必要です', 'err');
+  showMsg('dataMsg', 'クラウドから復元中…', '');
+  const ok = await pullFromCloud(userId);
+  if (!ok) return showMsg('dataMsg', 'クラウドにデータが見つかりません', 'err');
+  showMsg('dataMsg', '復元完了。再読み込みします…', '');
+  setTimeout(() => location.reload(), 1200);
+}
+
+function exportData() {
+  const userId = localStorage.getItem(A_USER) || 'default';
+  const backup = { version: 1, exportedAt: new Date().toISOString(), userId, data: {} };
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(`ura-${userId}-`) || key === A_USER || key === A_HASH || key === A_NAME || key === A_EMAIL || key === A_THEME) {
+      backup.data[key] = localStorage.getItem(key);
+    }
+  }
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ura-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showMsg('dataMsg', 'エクスポート完了しました', 'ok');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const backup = JSON.parse(e.target.result);
+      if (!backup.data) throw new Error('invalid');
+      if (!confirm(`${backup.exportedAt?.slice(0,10) || ''}のバックアップを復元します。現在のデータは上書きされます。よろしいですか？`)) return;
+      Object.entries(backup.data).forEach(([key, val]) => localStorage.setItem(key, val));
+      showMsg('dataMsg', '復元しました。ページを再読み込みします…', 'ok');
+      setTimeout(() => location.reload(), 1500);
+    } catch {
+      showMsg('dataMsg', 'ファイルが正しくありません', 'err');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+async function initAuth() {
+  if (isLoggedIn()) { startApp(); return; }
+  document.getElementById('loginScreen').style.display = '';
+  showLogin();
+}
+
+// ── Theme ─────────────────────────────────────────
+const A_THEME = 'ura-theme';
+const A_NAME  = 'ura-auth-name';
+const A_EMAIL = 'ura-auth-email';
+
+function applyTheme(name) {
+  document.body.classList.toggle('theme-light', name === 'light');
+  localStorage.setItem(A_THEME, name);
+  ['light','dark'].forEach(t => {
+    document.getElementById(`topt-${t}`)?.classList.toggle('selected', t === name);
+  });
+}
+function initTheme() { applyTheme(localStorage.getItem(A_THEME) || 'dark'); }
+function openThemeModal()  { document.getElementById('themeModal').style.display = ''; }
+function closeThemeModal() { document.getElementById('themeModal').style.display = 'none'; }
+
+// ── Account ───────────────────────────────────────
+function showAccountModal() {
+  document.getElementById('acctIdDisp').textContent = localStorage.getItem(A_USER) || '—';
+  document.getElementById('acctName').value  = localStorage.getItem(A_NAME)  || '';
+  document.getElementById('acctEmail').value = localStorage.getItem(A_EMAIL) || '';
+  ['acctOldPw','acctNewPw','acctNewPw2'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('acctMsg').textContent = '';
+  document.getElementById('acctModal').style.display = '';
+}
+function closeAccountModal() { document.getElementById('acctModal').style.display = 'none'; }
+
+function saveAccountInfo() {
+  const name  = document.getElementById('acctName').value.trim();
+  const email = document.getElementById('acctEmail').value.trim();
+  localStorage.setItem(A_NAME, name);
+  localStorage.setItem(A_EMAIL, email);
+  showMsg('acctMsg', '保存しました', 'ok');
+}
+
+async function changePassword() {
+  const oldPw  = document.getElementById('acctOldPw').value;
+  const newPw  = document.getElementById('acctNewPw').value;
+  const newPw2 = document.getElementById('acctNewPw2').value;
+  if (!oldPw) return showMsg('acctMsg', '現在のパスワードを入力してください', 'err');
+  if (await sha256(oldPw) !== localStorage.getItem(A_HASH))
+    return showMsg('acctMsg', '現在のパスワードが違います', 'err');
+  if (newPw.length < 4) return showMsg('acctMsg', '新しいパスワードは4文字以上', 'err');
+  if (newPw !== newPw2) return showMsg('acctMsg', 'パスワードが一致しません', 'err');
+  localStorage.setItem(A_HASH, await sha256(newPw));
+  ['acctOldPw','acctNewPw','acctNewPw2'].forEach(id => document.getElementById(id).value = '');
+  showMsg('acctMsg', 'パスワードを変更しました', 'ok');
+}
+
+// ── View Pages ────────────────────────────────────
+function openView(type) {
+  closeMenu();
+  document.getElementById('viewPage').style.display = '';
+  switchView(type);
+}
+function switchView(type) {
+  document.querySelectorAll('.view-tab').forEach(b =>
+    b.classList.toggle('active', b.textContent.trim().toUpperCase() === type)
+  );
+  document.getElementById('viewBody').innerHTML =
+    '<div style="padding:24px 20px;font-size:10px;letter-spacing:3px;color:var(--muted)">Loading...</div>';
+  requestAnimationFrame(() => renderViewContent(type));
+}
+function closeViewPage() { document.getElementById('viewPage').style.display = 'none'; }
+
+function renderViewContent(type) {
+  collect();
+  const body = document.getElementById('viewBody');
+  switch (type) {
+    case 'DAILY':   body.innerHTML = buildDailyView();   break;
+    case 'WEEKLY':  body.innerHTML = buildWeeklyView();  break;
+    case 'MONTHLY': body.innerHTML = buildMonthlyView(); break;
+    case 'YEARLY':  body.innerHTML = buildYearlyView();  break;
+  }
+  animateFatClips();
+}
+
+function animateFatClips() {
+  const DRAW_SPEED = 1000; // px/s 固定（lineChart・buildScrollGraph と統一）
+  document.querySelectorAll('.fat-clip-rect').forEach(rect => {
+    const end     = parseFloat(rect.getAttribute('data-end'))     || 0;
+    const pathLen = parseFloat(rect.getAttribute('data-pathlen')) || 0;
+    if (end <= 0) return;
+    const dur = Math.max(150, pathLen / DRAW_SPEED * 1000);
+    const start = performance.now();
+    function step(now) {
+      const p = Math.min((now - start) / dur, 1);
+      rect.setAttribute('width', (p * end).toFixed(1));
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+function getStoredMonth(y, m) {
+  const user = localStorage.getItem(A_USER) || 'default';
+  const k = `ura-${user}-${y}-${String(m).padStart(2,'0')}`;
+  try { return JSON.parse(localStorage.getItem(k)) || null; }
+  catch(e) { return null; }
+}
+
+function monthAvgField(d, field) {
+  if (!d?.weeks) return null;
+  const vals = [];
+  d.weeks.forEach(wk => {
+    (wk[field] || []).forEach(v => {
+      if (v !== '' && v !== null && !isNaN(parseFloat(v))) vals.push(parseFloat(v));
+    });
+  });
+  return vals.length ? parseFloat((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)) : null;
+}
+
+function buildDailyView() {
+  const { last, day1js, numWeeks } = monthInfo(yr, mo);
+  const wgts = Array(last).fill(null), fats = Array(last).fill(null);
+  for (let w = 0; w < numWeeks; w++) {
+    const s = 1 - day1js + w * 7;
+    for (let di = 0; di < 7; di++) {
+      const date = s + di;
+      if (date < 1 || date > last) continue;
+      const wv = data.weeks[w].weight?.[di] || '';
+      const fv = data.weeks[w].fatpct?.[di] || '';
+      if (wv && !isNaN(parseFloat(wv))) wgts[date-1] = parseFloat(wv);
+      if (fv && !isNaN(parseFloat(fv))) fats[date-1] = parseFloat(fv);
+    }
+  }
+  const labels = Array.from({length: last}, (_, i) => String(i+1));
+  return buildScrollGraph(wgts, fats, labels, `${yr}年${mo}月 — Daily`);
+}
+
+function buildWeeklyView() {
+  const { numWeeks, day1js, last } = monthInfo(yr, mo);
+  const wgts = [], fats = [], labels = [];
+  for (let w = 0; w < numWeeks; w++) {
+    const s = 1 - day1js + w * 7;
+    let wv = null, fv = null;
+    for (let di = 6; di >= 0; di--) {
+      const date = s + di;
+      if (date < 1 || date > last) continue;
+      const wr = data.weeks[w].weight?.[di] || '';
+      const fr = data.weeks[w].fatpct?.[di] || '';
+      if (wv === null && wr && !isNaN(parseFloat(wr))) wv = parseFloat(wr);
+      if (fv === null && fr && !isNaN(parseFloat(fr))) fv = parseFloat(fr);
+    }
+    wgts.push(wv); fats.push(fv); labels.push(`W${w+1}`);
+  }
+  return buildScrollGraph(wgts, fats, labels, `${yr}年${mo}月 — Weekly`);
+}
+
+function buildMonthlyView() {
+  const wgts = [], fats = [], labels = [];
+  for (let m = 1; m <= 12; m++) {
+    const d = m === mo ? data : getStoredMonth(yr, m);
+    wgts.push(monthAvgField(d, 'weight'));
+    fats.push(monthAvgField(d, 'fatpct'));
+    labels.push(`${m}月`);
+  }
+  return buildScrollGraph(wgts, fats, labels, `${yr}年 — Monthly`);
+}
+
+function buildYearlyView() {
+  const wgts = [], fats = [], labels = [];
+  const startY = yr - 2;
+  for (let y = startY; y <= yr; y++) {
+    let wAll = [], fAll = [];
+    for (let m = 1; m <= 12; m++) {
+      const d = (y === yr && m === mo) ? data : getStoredMonth(y, m);
+      const w = monthAvgField(d, 'weight');
+      const f = monthAvgField(d, 'fatpct');
+      if (w !== null) wAll.push(w);
+      if (f !== null) fAll.push(f);
+    }
+    wgts.push(wAll.length ? parseFloat((wAll.reduce((a,b)=>a+b,0)/wAll.length).toFixed(1)) : null);
+    fats.push(fAll.length ? parseFloat((fAll.reduce((a,b)=>a+b,0)/fAll.length).toFixed(1)) : null);
+    labels.push(String(y));
+  }
+  return buildScrollGraph(wgts, fats, labels, '年間推移 — Yearly');
+}
+
+function buildScrollGraph(wgts, fats, labels, subtitle) {
+  const n = labels.length;
+  const isLight = document.body.classList.contains('theme-light');
+  const lc  = isLight ? 'rgba(0,0,0,.75)' : 'rgba(255,255,255,.75)';
+  const lc2 = isLight ? 'rgba(0,0,0,.4)'  : 'rgba(255,255,255,.4)';
+  const tc  = isLight ? 'rgba(0,0,0,.85)' : 'rgba(255,255,255,.85)';
+  const xc  = isLight ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.35)';
+  const dot = isLight ? '#111' : '#fff';
+
+  const availW = Math.max(280, (window.innerWidth || 375) - 40);
+  const slotW = n <= 12
+    ? Math.max(28, Math.min(80, availW / n))
+    : Math.max(22, Math.min(50, availW / 12));
+  const W = Math.max(availW, slotW * n);
+  const GH = 78, sep = 22, xLH = 18, padT = 18, padB = 4;
+  const H = padT + GH + sep + GH + padB + xLH;
+
+  const xOf = i => slotW * i + slotW / 2;
+  function makeYFn(vals, oy) {
+    const vld = vals.filter(v => v !== null);
+    if (!vld.length) return () => oy + GH / 2;
+    let mn = Math.min(...vld), mx = Math.max(...vld);
+    if (mx - mn < 0.5) { mn -= 1; mx += 1; }
+    return v => oy + padT + (GH - padT - padB) * (1 - (v - mn) / (mx - mn));
+  }
+  const wY = makeYFn(wgts, 0);
+  const fY = makeYFn(fats, GH + sep);
+
+  function segs(vals, yFn) {
+    const out = [], cur = [];
+    vals.forEach((v, i) => {
+      if (v !== null) cur.push(`${xOf(i).toFixed(1)},${yFn(v).toFixed(1)}`);
+      else if (cur.length) { out.push([...cur]); cur.length = 0; }
+    });
+    if (cur.length) out.push(cur);
+    return out;
+  }
+
+  // 体脂肪データのX幅（最初〜最後のデータ点）を計算
+  let fatXMin = W, fatXMax = 0;
+  fats.forEach((v, i) => { if (v !== null) { fatXMin = Math.min(fatXMin, xOf(i)); fatXMax = Math.max(fatXMax, xOf(i)); } });
+  const fatClipEnd = fatXMax > fatXMin ? fatXMax + slotW / 2 : 0;
+
+  // 体脂肪線の実パス長を計算（体重線と同じ速度に合わせるため）
+  let fatPathLen = 0, prevFPt = null;
+  fats.forEach((v, i) => {
+    if (v === null) { prevFPt = null; return; }
+    const pt = [xOf(i), fY(v)];
+    if (prevFPt) fatPathLen += Math.sqrt((pt[0]-prevFPt[0])**2+(pt[1]-prevFPt[1])**2);
+    prevFPt = pt;
+  });
+
+  const fclipId = `svf-fclip-${Date.now()}`;
+  let svg = `<svg width="${W}" height="${H}" style="display:block;min-width:${W}px">
+  <defs><filter id="svf" x="-50%" y="-50%" width="200%" height="200%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <clipPath id="${fclipId}">
+    <rect class="fat-clip-rect" x="0" y="0" height="${H}" width="0"
+      data-end="${fatClipEnd.toFixed(1)}" data-pathlen="${fatPathLen.toFixed(1)}"/>
+  </clipPath></defs>`;
+
+  const DRAW_SPEED = 1000; // px/s 固定
+  function calcCumDist(vals, yFn) {
+    const cd = new Array(vals.length).fill(null);
+    let d = 0, prev = null;
+    vals.forEach((v, i) => {
+      if (v === null) { prev = null; return; }
+      const pt = [xOf(i), yFn(v)];
+      if (prev) d += Math.sqrt((pt[0]-prev[0])**2+(pt[1]-prev[1])**2);
+      cd[i] = d; prev = pt;
+    });
+    return { cd, total: d || 1 };
+  }
+  function drawSegs(vals, yFn, stroke, extra) {
+    segs(vals, yFn).forEach(pts => {
+      if (pts.length < 2) return;
+      let sl = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const [x1,y1]=pts[i-1].split(',').map(Number), [x2,y2]=pts[i].split(',').map(Number);
+        sl += Math.sqrt((x2-x1)**2+(y2-y1)**2);
+      }
+      const segDur = Math.max(0.15, sl / DRAW_SPEED);
+      svg += `<polyline points="${pts.join(' ')}" fill="none" stroke="${stroke}" stroke-width="1.5" stroke-linejoin="round" filter="url(#svf)"${extra||''} stroke-dasharray="${sl.toFixed(1)}" stroke-dashoffset="${sl.toFixed(1)}"><animate attributeName="stroke-dashoffset" from="${sl.toFixed(1)}" to="0" dur="${segDur.toFixed(3)}s" begin="0s" fill="freeze" calcMode="linear"/></polyline>`;
+    });
+  }
+
+  drawSegs(wgts, wY, lc);
+  const { cd: wcd, total: wTotal } = calcCumDist(wgts, wY);
+  const wDur = Math.max(0.15, wTotal / DRAW_SPEED);
+  wgts.forEach((v, i) => {
+    if (v === null) return;
+    const st = (wcd[i] / wTotal * wDur).toFixed(2);
+    const x = xOf(i).toFixed(1), y = wY(v).toFixed(1);
+    svg += `<circle cx="${x}" cy="${y}" r="3" fill="${dot}" filter="url(#svf)" opacity="0"><animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${st}s" fill="freeze"/></circle>`;
+    svg += `<text x="${x}" y="${Math.max(10, wY(v)-6).toFixed(1)}" text-anchor="middle" font-size="8.5" fill="${tc}" font-family="-apple-system,sans-serif" opacity="0">${v}<animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${st}s" fill="freeze"/></text>`;
+  });
+
+  segs(fats, fY).forEach(pts => {
+    if (pts.length >= 2) svg += `<polyline points="${pts.join(' ')}" fill="none" stroke="${lc2}" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5,2.5" filter="url(#svf)" clip-path="url(#${fclipId})"/>`;
+  });
+  const fDur = Math.max(0.15, fatPathLen / DRAW_SPEED);
+  fats.forEach((v, i) => {
+    if (v === null) return;
+    const st = fatClipEnd > 0 ? (xOf(i) / fatClipEnd * fDur).toFixed(2) : '0.00';
+    const x = xOf(i).toFixed(1), y = fY(v).toFixed(1);
+    svg += `<circle cx="${x}" cy="${y}" r="2.5" fill="${dot}" filter="url(#svf)" opacity="0"><animate attributeName="opacity" from="0" to=".7" dur="0.1s" begin="${st}s" fill="freeze"/></circle>`;
+    svg += `<text x="${x}" y="${Math.max(GH+sep+10, fY(v)-5).toFixed(1)}" text-anchor="middle" font-size="8.5" fill="${tc}" font-family="-apple-system,sans-serif" opacity="0">${v}<animate attributeName="opacity" from="0" to=".85" dur="0.1s" begin="${st}s" fill="freeze"/></text>`;
+  });
+
+  const lblStep = Math.max(1, Math.ceil(n / 14));
+  labels.forEach((lbl, i) => {
+    if (i % lblStep !== 0 && i !== n - 1) return;
+    const st = (wcd[i] !== null ? wcd[i] / wTotal * wDur : i / Math.max(n-1,1) * wDur).toFixed(2);
+    svg += `<text x="${xOf(i).toFixed(1)}" y="${H-2}" text-anchor="middle" font-size="9" fill="${xc}" font-family="-apple-system,sans-serif" opacity="0">${lbl}<animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${st}s" fill="freeze"/></text>`;
+  });
+  svg += `</svg>`;
+
+  const leg = (c, dash, lbl) =>
+    `<div style="display:flex;align-items:center;gap:6px">
+      <svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="${c}" stroke-width="1.5"${dash?' stroke-dasharray="4,2"':''}/>
+      <circle cx="10" cy="5" r="2.5" fill="${c}"/></svg>
+      <span style="font-size:9px;letter-spacing:2px;color:${xc};text-transform:uppercase">${lbl}</span></div>`;
+
+  return `<div class="view-scroll-x">
+    <div style="font-size:8px;letter-spacing:4px;color:${xc};text-transform:uppercase;margin-bottom:12px;flex-shrink:0">${subtitle}</div>
+    <div style="display:flex;gap:18px;margin-bottom:14px">${leg(lc,false,'体重 kg')}${leg(lc2,true,'体脂肪率 %')}</div>
+    ${svg}
+    <div style="height:24px"></div>
+  </div>`;
+}
+
+// ── Menu ─────────────────────────────────────────
+function toggleMenu() {
+  const open = document.getElementById('menuDrawer').classList.toggle('open');
+  document.getElementById('menuOverlay').classList.toggle('open', open);
+  if (open) updateMenuActive();
+}
+
+function closeMenu() {
+  document.getElementById('menuDrawer').classList.remove('open');
+  document.getElementById('menuOverlay').classList.remove('open');
+}
+
+function updateMenuActive() {
+  const { numWeeks } = monthInfo(yr, mo);
+  const map = { daily: currentTab < numWeeks, weekly: currentTab < numWeeks, monthly: currentTab === numWeeks };
+  ['daily','weekly','monthly','yearly','theme','account'].forEach(k => {
+    document.getElementById(`mi-${k}`)?.classList.toggle('menu-active', !!map[k]);
+  });
+}
+
+function menuGo(section) {
+  closeMenu();
+  switch (section) {
+    case 'home':     closeViewPage(); switchTab(currentWeekIdx()); break;
+    case 'account':  showAccountModal();   break;
+    case 'daily':    openView('DAILY');    break;
+    case 'weekly':   openView('WEEKLY');   break;
+    case 'monthly':  openView('MONTHLY');  break;
+    case 'yearly':   openView('YEARLY');   break;
+    case 'theme':    openThemeModal();     break;
+  }
+}
+
+function closeAccountModal() {
+  document.getElementById('acctModal').style.display = 'none';
+}
+
+// ── Init ─────────────────────────────────────────
+initTheme();
+checkTransferHash().then(() => initAuth());
+</script>
+</body>
+</html>
