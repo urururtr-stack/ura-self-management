@@ -2316,7 +2316,7 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '', wStep = 0.
       data-end="${fatClipEnd.toFixed(1)}" data-pathlen="${fatPathLen.toFixed(1)}"/>
   </clipPath></defs>`;
 
-  drawGrid(wRange, 0, 0.5);
+  drawGrid(wRange, 0, wStep);
   drawGrid(fRange, GH + sep, 0.1);
   drawVerticalGrid();
 
