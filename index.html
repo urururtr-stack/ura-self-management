@@ -2291,12 +2291,17 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '') {
   const gc = isLight ? 'rgba(0,0,0,.13)' : 'rgba(255,255,255,.13)';
   function drawGrid(range, oy) {
     if (!range) return;
-    const { mn, mx } = range;
     [0, 0.25, 0.5, 0.75, 1].forEach(t => {
       const y = (oy + padT + (GH - padT - padB) * t).toFixed(1);
-      const v = (mx - (mx - mn) * t).toFixed(1);
       svg += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="${gc}" stroke-width="0.7"/>`;
-      svg += `<text x="3" y="${(parseFloat(y) - 3).toFixed(1)}" font-size="9" fill="${xc}" font-family="-apple-system,sans-serif" opacity="0.55">${v}</text>`;
+    });
+  }
+  function drawVerticalGrid() {
+    const lblStep = Math.max(1, Math.ceil(labels.length / 14));
+    labels.forEach((lbl, i) => {
+      if (i % lblStep !== 0 && i !== labels.length - 1) return;
+      const x = xOf(i).toFixed(1);
+      svg += `<line x1="${x}" y1="0" x2="${x}" y2="${(H - xLH).toFixed(1)}" stroke="${gc}" stroke-width="0.7"/>`;
     });
   }
 
