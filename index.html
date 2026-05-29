@@ -2225,7 +2225,7 @@ function buildYearlyView() {
   return buildScrollGraph(wgts, fats, labels, '年間推移 — Yearly', buildNavHtml(`${startY}〜${endY}年`, 'year'));
 }
 
-function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '') {
+function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '', wStep = 0.5) {
   const n = labels.length;
   const isLight = document.body.classList.contains('theme-light');
   const lc  = isLight ? 'rgba(0,0,0,.75)' : 'rgba(255,255,255,.75)';
