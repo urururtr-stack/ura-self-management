@@ -1197,7 +1197,7 @@ function renderWeightGraph(weekIdx) {
       if (v === null) return;
       const y = yOf(v);
       svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.5" fill="${dot}" filter="url(#${filterId})" opacity="0"><animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${t}s" fill="freeze"/></circle>`;
-      if (showValLabels) svg += `<text x="${x.toFixed(1)}" y="${Math.max(11, y - 5).toFixed(1)}" text-anchor="middle" font-size="8" fill="${tc}" font-family="-apple-system,sans-serif" opacity="0">${v}<animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${t}s" fill="freeze"/></text>`;
+      if (showValLabels) svg += `<text x="${x.toFixed(1)}" y="${Math.max(11, y - 5).toFixed(1)}" text-anchor="middle" font-size="10" fill="${tc}" font-family="-apple-system,sans-serif" opacity="0">${v}<animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${t}s" fill="freeze"/></text>`;
     });
 
     svg += `</svg>`;
