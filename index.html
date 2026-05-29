@@ -874,14 +874,16 @@ body.theme-light .view-header { background: rgba(244,244,244,.96); }
 <!-- ── View Page ── -->
 <div id="viewPage" class="view-page" style="display:none">
   <div class="view-header">
-    <button class="view-back" onclick="closeViewPage()">‹</button>
-    <div class="view-tabs">
-      <button class="view-tab" onclick="switchView('DAILY')">Daily</button>
-      <button class="view-tab" onclick="switchView('WEEKLY')">Weekly</button>
-      <button class="view-tab" onclick="switchView('MONTHLY')">Monthly</button>
-      <button class="view-tab" onclick="switchView('YEARLY')">Yearly</button>
+    <div class="view-header-brand" onclick="closeViewPage(); goToday()">Self Management Progress</div>
+    <div class="view-header-nav">
+      <button class="view-back" onclick="closeViewPage()">‹</button>
+      <div class="view-tabs">
+        <button class="view-tab" onclick="switchView('DAILY')">Daily</button>
+        <button class="view-tab" onclick="switchView('WEEKLY')">Weekly</button>
+        <button class="view-tab" onclick="switchView('MONTHLY')">Monthly</button>
+        <button class="view-tab" onclick="switchView('YEARLY')">Yearly</button>
+      </div>
     </div>
-    <span class="view-title-text" id="viewTitleText"></span>
   </div>
   <div class="view-body" id="viewBody"></div>
 </div>
