@@ -2222,7 +2222,7 @@ function buildYearlyView() {
     fats.push(fAll.length ? parseFloat((fAll.reduce((a,b)=>a+b,0)/fAll.length).toFixed(1)) : null);
     labels.push(String(y));
   }
-  return buildScrollGraph(wgts, fats, labels, '年間推移 — Yearly', buildNavHtml(`${startY}〜${endY}年`, 'year'));
+  return buildScrollGraph(wgts, fats, labels, '年間推移 — Yearly', buildNavHtml(`${startY}〜${endY}年`, 'year'), 1);
 }
 
 function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '', wStep = 0.5) {
