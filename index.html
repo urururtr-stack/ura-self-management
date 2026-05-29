@@ -2288,6 +2288,18 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '') {
   });
 
   const fclipId = `svf-fclip-${Date.now()}`;
+  const gc = isLight ? 'rgba(0,0,0,.13)' : 'rgba(255,255,255,.13)';
+  function drawGrid(range, oy) {
+    if (!range) return;
+    const { mn, mx } = range;
+    [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+      const y = (oy + padT + (GH - padT - padB) * t).toFixed(1);
+      const v = (mx - (mx - mn) * t).toFixed(1);
+      svg += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="${gc}" stroke-width="0.7"/>`;
+      svg += `<text x="3" y="${(parseFloat(y) - 3).toFixed(1)}" font-size="9" fill="${xc}" font-family="-apple-system,sans-serif" opacity="0.55">${v}</text>`;
+    });
+  }
+
   let svg = `<svg width="${W}" height="${H}" style="display:block;min-width:${W}px">
   <defs><filter id="svf" x="-50%" y="-50%" width="200%" height="200%">
     <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="b"/>
@@ -2297,6 +2309,9 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '') {
     <rect class="fat-clip-rect" x="0" y="0" height="${H}" width="0"
       data-end="${fatClipEnd.toFixed(1)}" data-pathlen="${fatPathLen.toFixed(1)}"/>
   </clipPath></defs>`;
+
+  drawGrid(wRange, 0);
+  drawGrid(fRange, GH + sep);
 
   const DRAW_SPEED = 1000; // px/s 固定
   function calcCumDist(vals, yFn) {
