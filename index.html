@@ -2369,9 +2369,7 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '') {
     svg += `<text x="${x}" y="${Math.max(GH+sep+10, fY(v)-5).toFixed(1)}" text-anchor="middle" font-size="10" fill="${tc}" font-family="-apple-system,sans-serif" opacity="0">${v}<animate attributeName="opacity" from="0" to=".85" dur="0.1s" begin="${st}s" fill="freeze"/></text>`;
   });
 
-  const lblStep = Math.max(1, Math.ceil(n / 14));
   labels.forEach((lbl, i) => {
-    if (i % lblStep !== 0 && i !== n - 1) return;
     const st = (wcd[i] !== null ? wcd[i] / wTotal * wDur : i / Math.max(n-1,1) * wDur).toFixed(2);
     svg += `<text x="${xOf(i).toFixed(1)}" y="${H-2}" text-anchor="middle" font-size="11" fill="${xc}" font-family="-apple-system,sans-serif" opacity="0">${lbl}<animate attributeName="opacity" from="0" to="1" dur="0.1s" begin="${st}s" fill="freeze"/></text>`;
   });
