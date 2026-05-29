@@ -2338,15 +2338,18 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '') {
 
   const leg = (c, dash, lbl) =>
     `<div style="display:flex;align-items:center;gap:6px">
-      <svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="${c}" stroke-width="1.5"${dash?' stroke-dasharray="4,2"':''}/>
-      <circle cx="10" cy="5" r="2.5" fill="${c}"/></svg>
-      <span style="font-size:9px;letter-spacing:2px;color:${xc};text-transform:uppercase">${lbl}</span></div>`;
+      <svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="${c}" stroke-width="1.5"${dash?' stroke-dasharray="4,2"':''}/>
+      <circle cx="11" cy="5" r="2.5" fill="${c}"/></svg>
+      <span style="font-size:12px;letter-spacing:1px;color:${xc};text-transform:uppercase">${lbl}</span></div>`;
 
-  return `<div class="view-scroll-x">
-    <div style="font-size:8px;letter-spacing:4px;color:${xc};text-transform:uppercase;margin-bottom:12px;flex-shrink:0">${subtitle}</div>
-    <div style="display:flex;gap:18px;margin-bottom:14px">${leg(lc,false,'体重 kg')}${leg(lc2,true,'体脂肪率 %')}</div>
-    ${svg}
-    <div style="height:24px"></div>
+  return `<div>
+    ${navHtml}
+    <div class="view-scroll-x">
+      <div style="font-size:13px;letter-spacing:2px;color:${xc};text-transform:uppercase;margin-bottom:12px;flex-shrink:0">${subtitle}</div>
+      <div style="display:flex;gap:18px;margin-bottom:14px">${leg(lc,false,'体重 kg')}${leg(lc2,true,'体脂肪率 %')}</div>
+      ${svg}
+      <div style="height:24px"></div>
+    </div>
   </div>`;
 }
 
