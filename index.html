@@ -2240,19 +2240,28 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '') {
     ? Math.max(28, Math.min(80, availW / n))
     : Math.max(22, Math.min(50, availW / 12));
   const W = Math.max(availW, slotW * n);
-  const GH = 78, sep = 22, xLH = 18, padT = 18, padB = 4;
+  const sep = 20, xLH = 20, padT = 14, padB = 4;
+  const viewH = window.innerHeight || 667;
+  const GH = Math.max(100, Math.min(280, Math.round((viewH - 280) / 2)));
   const H = padT + GH + sep + GH + padB + xLH;
 
   const xOf = i => slotW * i + slotW / 2;
-  function makeYFn(vals, oy) {
+  function getRange(vals) {
     const vld = vals.filter(v => v !== null);
-    if (!vld.length) return () => oy + GH / 2;
+    if (!vld.length) return null;
     let mn = Math.min(...vld), mx = Math.max(...vld);
     if (mx - mn < 0.5) { mn -= 1; mx += 1; }
+    return { mn, mx };
+  }
+  function makeYFn(vals, oy, range) {
+    if (!range) return () => oy + GH / 2;
+    const { mn, mx } = range;
     return v => oy + padT + (GH - padT - padB) * (1 - (v - mn) / (mx - mn));
   }
-  const wY = makeYFn(wgts, 0);
-  const fY = makeYFn(fats, GH + sep);
+  const wRange = getRange(wgts);
+  const fRange = getRange(fats);
+  const wY = makeYFn(wgts, 0, wRange);
+  const fY = makeYFn(fats, GH + sep, fRange);
 
   function segs(vals, yFn) {
     const out = [], cur = [];
