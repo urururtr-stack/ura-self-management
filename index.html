@@ -2163,22 +2163,26 @@ function buildDailyView() {
 }
 
 function buildWeeklyView() {
-  const { numWeeks, day1js, last } = monthInfo(yr, mo);
+  const gyr = graphYr, gmo = graphMo;
+  const { numWeeks, day1js, last } = monthInfo(gyr, gmo);
   const wgts = [], fats = [], labels = [];
+  const gdata = (gyr === yr && gmo === mo) ? data : getStoredMonth(gyr, gmo);
   for (let w = 0; w < numWeeks; w++) {
     const s = 1 - day1js + w * 7;
     let wv = null, fv = null;
-    for (let di = 6; di >= 0; di--) {
-      const date = s + di;
-      if (date < 1 || date > last) continue;
-      const wr = data.weeks[w].weight?.[di] || '';
-      const fr = data.weeks[w].fatpct?.[di] || '';
-      if (wv === null && wr && !isNaN(parseFloat(wr))) wv = parseFloat(wr);
-      if (fv === null && fr && !isNaN(parseFloat(fr))) fv = parseFloat(fr);
+    if (gdata?.weeks) {
+      for (let di = 6; di >= 0; di--) {
+        const date = s + di;
+        if (date < 1 || date > last) continue;
+        const wr = gdata.weeks[w]?.weight?.[di] || '';
+        const fr = gdata.weeks[w]?.fatpct?.[di] || '';
+        if (wv === null && wr && !isNaN(parseFloat(wr))) wv = parseFloat(wr);
+        if (fv === null && fr && !isNaN(parseFloat(fr))) fv = parseFloat(fr);
+      }
     }
     wgts.push(wv); fats.push(fv); labels.push(`W${w+1}`);
   }
-  return buildScrollGraph(wgts, fats, labels, `${yr}年${mo}月 — Weekly`);
+  return buildScrollGraph(wgts, fats, labels, `${gyr}年${gmo}月 — Weekly`, buildNavHtml(`${gyr}年${gmo}月`));
 }
 
 function buildMonthlyView() {
