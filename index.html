@@ -2082,6 +2082,8 @@ function openView(type) {
   switchView(type);
 }
 function switchView(type) {
+  graphViewType = type;
+  graphYr = yr; graphMo = mo;
   document.querySelectorAll('.view-tab').forEach(b =>
     b.classList.toggle('active', b.textContent.trim().toUpperCase() === type)
   );
