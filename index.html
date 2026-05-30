@@ -2265,13 +2265,11 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '', wStep = 0.
   const fY = makeYFn(fats, GH + sep, fRange);
 
   function segs(vals, yFn) {
-    const out = [], cur = [];
+    const pts = [];
     vals.forEach((v, i) => {
-      if (v !== null) cur.push(`${xOf(i).toFixed(1)},${yFn(v).toFixed(1)}`);
-      else if (cur.length) { out.push([...cur]); cur.length = 0; }
+      if (v !== null) pts.push(`${xOf(i).toFixed(1)},${yFn(v).toFixed(1)}`);
     });
-    if (cur.length) out.push(cur);
-    return out;
+    return pts.length >= 2 ? [pts] : [];
   }
 
   // 体脂肪データのX幅（最初〜最後のデータ点）を計算
