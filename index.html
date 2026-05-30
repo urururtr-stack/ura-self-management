@@ -501,8 +501,9 @@ body.theme-light .menu-drawer {
 }
 .menu-drawer.open { right: 0; }
 .menu-drawer-top {
-  display: flex; justify-content: flex-end; padding: 18px 18px 0;
-  border-bottom: 1px solid var(--border); padding-bottom: 18px;
+  display: flex; justify-content: flex-end;
+  padding: calc(18px + env(safe-area-inset-top)) 18px 18px;
+  border-bottom: 1px solid var(--border);
 }
 body.theme-light .menu-drawer-top { border-bottom-color: #e8e8e8; }
 .menu-close {
