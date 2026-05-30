@@ -1322,7 +1322,7 @@ function renderWeek(w) {
   // チェック行
   let grid = makeHeader();
   ITEMS.forEach((item, ci) => {
-    grid += `<div class="check-row"><div class="item-label">${item}</div>${
+    grid += `<div class="check-row"><div class="item-label">${ITEM_LABELS[ci]}</div>${
       DAYS.map((_, di) => {
         const date = wkStart + di;
         const adj = adjOf(di);
