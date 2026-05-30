@@ -1421,8 +1421,11 @@ function updateWeekDelta(w) {
         lastVal = v; lastIdx = di;
       }
     }
-    if (firstVal === null || firstIdx === lastIdx) {
+    if (firstVal === null) {
       el.textContent = `— ${unit}`; el.className = 'delta-val'; return;
+    }
+    if (firstIdx === lastIdx) {
+      el.textContent = `0.0 ${unit}`; el.className = 'delta-val'; return;
     }
     const d = (lastVal - firstVal).toFixed(1);
     el.textContent = `${parseFloat(d)>0?'+':''}${d} ${unit}`;
