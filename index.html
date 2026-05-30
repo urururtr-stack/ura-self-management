@@ -1383,12 +1383,12 @@ function renderWeek(w) {
         if (adj) {
           if (isCellFuture(adj.y, adj.m, adj.d)) return `<div class="check-cell future-cell"></div>`;
           const val = adj.data.weeks[adj.aw]?.[key]?.[adj.adi] || '';
-          return `<input class="measure-cell" type="number" inputmode="decimal" step="0.1" min="0" placeholder="—"
+          return `<input class="measure-cell" type="number" inputmode="decimal" step="0.1" min="0" autocomplete="off" placeholder="—"
             value="${val}"
             oninput="saveAdjMonth(${adj.y},${adj.m},${adj.aw},${adj.adi},'${key}',this.value)">`;
         }
         if (isFuture(date)) return `<div class="check-cell future-cell"></div>`;
-        return `<input class="measure-cell" type="number" inputmode="decimal" step="0.1" min="0" placeholder="—"
+        return `<input class="measure-cell" type="number" inputmode="decimal" step="0.1" min="0" autocomplete="off" placeholder="—"
           id="${key}-${w}-${di}" value="${(wd[key]&&wd[key][di])||''}"
           oninput="updateWeekDelta(${w});updateGoalDiffs();autoSave()">`;
       }).join('')
