@@ -1017,7 +1017,9 @@ function autoSave() {
   _saveTimer = setTimeout(() => {
     collect();
     localStorage.setItem(key(), JSON.stringify(data));
+    const sy = window.scrollY;
     renderWeightGraph(currentTab);
+    window.scrollTo({ top: sy, behavior: 'instant' });
     const t = document.getElementById('toast');
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 1200);
