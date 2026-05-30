@@ -2480,19 +2480,33 @@ function closeAccountModal() {
 }
 
 // ── iOS keyboard scroll fix ──────────────────────
-let _scrollY = 0;
+let _kbScrollY = 0;
+let _kbOpen = false;
+
 document.addEventListener('focusin', e => {
-  if (e.target.classList.contains('measure-cell') || e.target.classList.contains('goal-header-input')) {
-    _scrollY = window.scrollY;
+  if (e.target.tagName === 'INPUT') {
+    _kbScrollY = window.scrollY;
+    _kbOpen = true;
   }
 });
 document.addEventListener('focusout', e => {
-  if (e.target.classList.contains('measure-cell') || e.target.classList.contains('goal-header-input')) {
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      window.scrollTo({ top: _scrollY, behavior: 'instant' });
-    }));
+  if (e.target.tagName === 'INPUT') {
+    _kbOpen = false;
+    setTimeout(() => {
+      if (!_kbOpen) window.scrollTo({ top: _kbScrollY, behavior: 'instant' });
+    }, 300);
   }
 });
+if (window.visualViewport) {
+  let _vvH = window.visualViewport.height;
+  window.visualViewport.addEventListener('resize', () => {
+    const h = window.visualViewport.height;
+    if (h > _vvH && !_kbOpen) {
+      window.scrollTo({ top: _kbScrollY, behavior: 'instant' });
+    }
+    _vvH = h;
+  });
+}
 
 // ── Init ─────────────────────────────────────────
 initTheme();
