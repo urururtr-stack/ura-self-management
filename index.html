@@ -1413,12 +1413,18 @@ function updateWeekDelta(w) {
   [['weight','kg'],['fatpct','%']].forEach(([key,unit]) => {
     const el = document.getElementById(`wdelta-${key}-${w}`);
     if (!el) return;
-    const sunVal = getDayVal(0, key);
-    const satVal = getDayVal(6, key);
-    if (sunVal === null || satVal === null) {
+    let firstVal = null, lastVal = null, firstIdx = -1, lastIdx = -1;
+    for (let di = 0; di < 7; di++) {
+      const v = getDayVal(di, key);
+      if (v !== null) {
+        if (firstVal === null) { firstVal = v; firstIdx = di; }
+        lastVal = v; lastIdx = di;
+      }
+    }
+    if (firstVal === null || firstIdx === lastIdx) {
       el.textContent = `— ${unit}`; el.className = 'delta-val'; return;
     }
-    const d = (satVal - sunVal).toFixed(1);
+    const d = (lastVal - firstVal).toFixed(1);
     el.textContent = `${parseFloat(d)>0?'+':''}${d} ${unit}`;
     el.className = `delta-val ${parseFloat(d)<0?'neg':'pos'}`;
   });
