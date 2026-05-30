@@ -1151,20 +1151,18 @@ function renderWeightGraph(weekIdx) {
     const xOf = i => n > 1 ? padX + i * step : W / 2;
     const yOf = v => padT + innerH - ((v - minV) / (maxV - minV)) * innerH;
 
-    const segs = [];
-    let cur = [];
+    const allPts = [];
     vals.forEach((v, i) => {
-      if (v !== null) cur.push(`${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`);
-      else { if (cur.length) { segs.push(cur); cur = []; } }
+      if (v !== null) allPts.push(`${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`);
     });
-    if (cur.length) segs.push(cur);
+    const segs = allPts.length >= 2 ? [allPts] : [];
 
     // 実際のパス長を計算してdasharray/dotタイミングを完全同期
     const DRAW_SPEED = 1000; // px/s 固定
     const cumDist = new Array(vals.length).fill(null);
     let runDist = 0, prevPt = null;
     vals.forEach((v, i) => {
-      if (v === null) { prevPt = null; return; }
+      if (v === null) return;
       const pt = [xOf(i), yOf(v)];
       if (prevPt) runDist += Math.sqrt((pt[0]-prevPt[0])**2 + (pt[1]-prevPt[1])**2);
       cumDist[i] = runDist;
