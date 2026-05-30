@@ -2479,6 +2479,21 @@ function closeAccountModal() {
   document.getElementById('acctModal').style.display = 'none';
 }
 
+// ── iOS keyboard scroll fix ──────────────────────
+let _scrollY = 0;
+document.addEventListener('focusin', e => {
+  if (e.target.classList.contains('measure-cell') || e.target.classList.contains('goal-header-input')) {
+    _scrollY = window.scrollY;
+  }
+});
+document.addEventListener('focusout', e => {
+  if (e.target.classList.contains('measure-cell') || e.target.classList.contains('goal-header-input')) {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      window.scrollTo({ top: _scrollY, behavior: 'instant' });
+    }));
+  }
+});
+
 // ── Init ─────────────────────────────────────────
 initTheme();
 checkTransferHash().then(() => initAuth());
