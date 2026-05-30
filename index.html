@@ -400,6 +400,13 @@ body {
 }
 .login-input:focus { border-color: var(--white); box-shadow: var(--neon-box); }
 .login-input::placeholder { color: var(--muted); }
+.login-input:-webkit-autofill,
+.login-input:-webkit-autofill:hover,
+.login-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--white) !important;
+  caret-color: var(--white);
+}
 .stay-label {
   display: flex; align-items: center; gap: 10px;
   font-size: 12px; color: var(--silver); letter-spacing: 1px;
