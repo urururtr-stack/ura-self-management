@@ -573,7 +573,7 @@ body.theme-light .login-video  { display: none; }
 }
 .view-header {
   display: flex; flex-direction: column;
-  padding: 14px 20px 0; border-bottom: 1px solid var(--border2);
+  padding: calc(14px + env(safe-area-inset-top)) 20px 0; border-bottom: 1px solid var(--border2);
   background: rgba(0,0,0,.96); backdrop-filter: blur(24px);
   flex-shrink: 0;
 }
