@@ -2498,7 +2498,7 @@ document.addEventListener('focusout', e => {
     // キーボードアニメーション完了後にスクロール位置を復元
     setTimeout(() => {
       if (!_kbOpen) window.scrollTo({ top: _lastScrollY, behavior: 'instant' });
-    }, 350);
+    }, 0);
   }
 });
 
