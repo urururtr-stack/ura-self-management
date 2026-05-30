@@ -2325,7 +2325,7 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '', wStep = 0.
     const cd = new Array(vals.length).fill(null);
     let d = 0, prev = null;
     vals.forEach((v, i) => {
-      if (v === null) { prev = null; return; }
+      if (v === null) return;
       const pt = [xOf(i), yFn(v)];
       if (prev) d += Math.sqrt((pt[0]-prev[0])**2+(pt[1]-prev[1])**2);
       cd[i] = d; prev = pt;
