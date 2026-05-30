@@ -2480,33 +2480,27 @@ function closeAccountModal() {
 }
 
 // ── iOS keyboard scroll fix ──────────────────────
-let _kbScrollY = 0;
+let _lastScrollY = 0;
 let _kbOpen = false;
 
+// キーボードが閉じている間、常に最新スクロール位置を記録
+window.addEventListener('scroll', () => {
+  if (!_kbOpen) _lastScrollY = window.scrollY;
+}, { passive: true });
+
 document.addEventListener('focusin', e => {
-  if (e.target.tagName === 'INPUT') {
-    _kbScrollY = window.scrollY;
-    _kbOpen = true;
-  }
+  if (e.target.tagName === 'INPUT') _kbOpen = true;
 });
+
 document.addEventListener('focusout', e => {
   if (e.target.tagName === 'INPUT') {
     _kbOpen = false;
+    // キーボードアニメーション完了後にスクロール位置を復元
     setTimeout(() => {
-      if (!_kbOpen) window.scrollTo({ top: _kbScrollY, behavior: 'instant' });
-    }, 300);
+      if (!_kbOpen) window.scrollTo({ top: _lastScrollY, behavior: 'instant' });
+    }, 350);
   }
 });
-if (window.visualViewport) {
-  let _vvH = window.visualViewport.height;
-  window.visualViewport.addEventListener('resize', () => {
-    const h = window.visualViewport.height;
-    if (h > _vvH && !_kbOpen) {
-      window.scrollTo({ top: _kbScrollY, behavior: 'instant' });
-    }
-    _vvH = h;
-  });
-}
 
 // ── Init ─────────────────────────────────────────
 initTheme();
