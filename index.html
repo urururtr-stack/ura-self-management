@@ -2280,7 +2280,7 @@ function buildScrollGraph(wgts, fats, labels, subtitle, navHtml = '', wStep = 0.
   // 体脂肪線の実パス長を計算（体重線と同じ速度に合わせるため）
   let fatPathLen = 0, prevFPt = null;
   fats.forEach((v, i) => {
-    if (v === null) { prevFPt = null; return; }
+    if (v === null) return;
     const pt = [xOf(i), fY(v)];
     if (prevFPt) fatPathLen += Math.sqrt((pt[0]-prevFPt[0])**2+(pt[1]-prevFPt[1])**2);
     prevFPt = pt;
