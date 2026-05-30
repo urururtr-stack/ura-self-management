@@ -223,6 +223,13 @@ body {
 .measure-cell::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .measure-cell:focus { border-color: var(--white); box-shadow: var(--neon-box); }
 .measure-cell::placeholder { color: var(--border2); }
+.measure-cell:-webkit-autofill,
+.measure-cell:-webkit-autofill:hover,
+.measure-cell:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--white) !important;
+  caret-color: var(--white);
+}
 
 /* ── Divider ── */
 .sep { height: 1px; background: var(--border); margin: 20px 0; }
